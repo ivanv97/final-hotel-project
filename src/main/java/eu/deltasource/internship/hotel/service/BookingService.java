@@ -7,10 +7,11 @@ import eu.deltasource.internship.hotel.repository.BookingRepository;
 
 
 import java.time.LocalDate;
+import java.time.Period;
 import java.util.List;
 
 /**
- * Created by Taner Ilyazov - Delta Source Bulgaria on 2019-07-28.
+ * Represents booking services
  */
 public class BookingService {
 
@@ -19,6 +20,7 @@ public class BookingService {
     private final RoomService roomService;
 
     private final GuestService guestService;
+
 
     public BookingService(BookingRepository bookingRepository, RoomService roomService, GuestService guestService) {
         this.bookingRepository = bookingRepository;
@@ -42,55 +44,75 @@ public class BookingService {
      * @param ID booking's ID
      */
     public boolean deleteByID(int ID) {
-        if (!this.bookingRepository.deleteById(ID)) {
+        if (!bookingRepository.deleteById(ID)) {
             throw new ItemNotFoundException("Booking with such ID does not exits!");
         }
         return true;
     }
 
     /**
-     * Under construction
+     * Updates existing booking
+     *
+     * @param bookingID booking's ID
+     * @param from      starting date
+     * @param to        ending date
      */
-    public void updateDates(int bookingID, LocalDate from, LocalDate to) {
-        Booking booking = bookingRepository.findById(bookingID);
-
-        for (Booking book : bookingRepository.findAll()) {
-            if (checkOverlapping(from, to)==true){
-                throw new FailedInitializationException("Dates overlapping!");
-            }
+    public void updateBooking(int bookingID, LocalDate from, LocalDate to) {
+        if (from == null || to == null || from.isAfter(to) || from.equals(to)) {
+            throw new FailedInitializationException("Invalid dates!");
         }
 
+        Booking booking = bookingRepository.findById(bookingID);
+        int roomID = booking.getRoomId();
+
+        for (Booking book : bookingRepository.findAll()) {
+            if (roomID == book.getRoomId() && checkOverlapping(from, to, book)) {
+                throw new FailedInitializationException("Dates are overlapped!");
+            }
+        }
+        booking.setBookingDates(from, to);
+        bookingRepository.save(booking);
     }
 
-    private boolean checkOverlapping(LocalDate from, LocalDate to) {
-        if (from.isAfter(to) || from.equals(to))
-            return true;
-        return false;
+    /**
+     * Checks if the new dates overlaps the booking for the room
+     *
+     * @param from        starting date
+     * @param to          ending date
+     * @param roomBooking room's booking
+     * @return
+     */
+    public boolean checkOverlapping(LocalDate from, LocalDate to, Booking roomBooking) {
+        // not interested
+        if (from.isAfter(roomBooking.getFrom()) && to.isAfter(roomBooking.getTo())) {
+            return false;
+        }
+
+        Period period = Period.between(from, to);
+        int totalDays = period.getDays();
+
+        if (from.plusDays(totalDays).isBefore(roomBooking.getFrom()) ||
+                from.plusDays(totalDays).isEqual(roomBooking.getFrom())) {
+            return false;
+        }
+        return true;
     }
 
-    public void save(Booking item) {
-        this.bookingRepository.save(item);
-    }
-
+    /**
+     * Finds all bookings
+     *
+     * @return list of all bookings
+     */
     public List<Booking> findAll() {
         return this.bookingRepository.findAll();
     }
 
-    private boolean checkIfBooked(Booking item) {
-        if (this.bookingRepository.findAll().isEmpty()) {
-            return false;
-        }
-        for (Booking booking : this.bookingRepository.findAll()) {
-            if (booking.getRoomId() == item.getRoomId()) {
-                if (item.getFrom() != null && item.getTo() != null && item.getTo().isAfter(item.getFrom())) {
-                    if (!item.getFrom().isBefore(booking.getTo()) || !item.getTo().isAfter(booking.getFrom())) {
-                        return false;
-                    }
-                } else {
-                    throw new FailedInitializationException("The dates passed are not correct!");
-                }
-            }
-        }
-        return true;
+    /**
+     * Creates new booking
+     *
+     * @param newBooking the new booking
+     */
+    public void save(Booking newBooking) {
+        bookingRepository.save(newBooking);
     }
 }

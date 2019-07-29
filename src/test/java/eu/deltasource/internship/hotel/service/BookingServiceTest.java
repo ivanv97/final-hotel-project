@@ -87,8 +87,8 @@ public class BookingServiceTest {
         LocalDate secondTo = LocalDate.of(2019, 9, 21);
         Booking secondBooking = new Booking(2, 345, 4, 3, secondFrom, secondTo);
 
-        LocalDate thirdFrom = LocalDate.of(2019, 7, 30);
-        LocalDate thirdTo = LocalDate.of(2019, 7, 31);
+        LocalDate thirdFrom = LocalDate.of(2019, 8, 15);
+        LocalDate thirdTo = LocalDate.of(2019, 8, 18);
         Booking thirdBooking = new Booking(3, 465, 4, 3, thirdFrom, thirdTo);
 
         bookingService.save(firstBooking);
@@ -138,15 +138,32 @@ public class BookingServiceTest {
         assertThrows(ItemNotFoundException.class, () -> bookingService.deleteByID(bookingID));
     }
 
-    /**
-     * Under construction
-     */
-    @Test
-    public void updateDates() {
-        LocalDate fromDate = LocalDate.of(2019, 12, 7);
-        LocalDate toDate = LocalDate.of(2019, 12, 12);
-        Booking updateBooking = new Booking(1, 101, 1, 2, fromDate, toDate);
 
+    @Test
+    public void updateDatesSuccessfully() {
+        // given
+        int bookingID = 3;
+        LocalDate fromDate = LocalDate.of(2019, 8, 7);
+        LocalDate toDate = LocalDate.of(2019, 8, 12);
+        Booking booking = bookingRepository.findById(bookingID);
+        int roomID = booking.getRoomId();
+
+        // when and then
+        assertDoesNotThrow(() -> bookingService.updateBooking(bookingID, fromDate, toDate));
+    }
+
+    @Test
+    public void updateDatesUnsuccessfully() {
+        // given
+        int bookingID = 3;
+        LocalDate fromDate = LocalDate.of(2019, 8, 15);
+        LocalDate toDate = LocalDate.of(2019, 8, 18);
+        Booking booking = bookingRepository.findById(bookingID);
+        int roomID = booking.getRoomId();
+
+        // when and then
+        assertThrows(FailedInitializationException.class,
+                () -> bookingService.updateBooking(bookingID, fromDate, toDate));
     }
 
     @Test
