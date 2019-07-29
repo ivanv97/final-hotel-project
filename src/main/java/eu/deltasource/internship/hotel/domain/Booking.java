@@ -12,9 +12,7 @@ public class Booking {
     private final int bookingId;
     private final int guestId;
     private final int roomId;
-
     private int numberOfPeople;
-
     private LocalDate from;
     private LocalDate to;
 

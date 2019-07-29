@@ -40,7 +40,7 @@ public class TestConfiguration {
 
         // Filling up hotel with ready rooms to use
 
-        // Comodities for a double room
+        // Commodities for a double room
         AbstractCommodity doubleBed = new Bed(BedType.DOUBLE);
         AbstractCommodity toilet = new Toilet();
         AbstractCommodity shower = new Shower();
