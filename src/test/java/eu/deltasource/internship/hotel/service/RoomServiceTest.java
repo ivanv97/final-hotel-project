@@ -2,6 +2,7 @@ package eu.deltasource.internship.hotel.service;
 
 import eu.deltasource.internship.hotel.domain.Room;
 import eu.deltasource.internship.hotel.domain.commodity.*;
+import eu.deltasource.internship.hotel.exception.FailedInitializationException;
 import eu.deltasource.internship.hotel.exception.ItemNotFoundException;
 import eu.deltasource.internship.hotel.repository.BookingRepository;
 import eu.deltasource.internship.hotel.repository.GuestRepository;
@@ -58,13 +59,10 @@ public class RoomServiceTest {
         roomService.saveRooms(doubleRoom, singleRoom, kingSizeRoom, threePeopleKingSizeRoom);
     }
 
-
     @Test
     public void getRoomByIdSuccessfully() {
         //given
-        Set<AbstractCommodity> kingSizeSet = new HashSet<>(Arrays.asList(new Bed(BedType.KING_SIZE), new Toilet(), new Shower()));
         int roomID = 3;
-        Room room = new Room(roomID, kingSizeSet);
 
         //when
         Room searchedRoom = roomService.getRoomById(roomID);
@@ -116,15 +114,15 @@ public class RoomServiceTest {
     public void deleteRoomByExistingId() {
         // given
         int roomID = 2;
-        int size=3;
+        int size = 3;
 
         // when
         boolean result = roomService.deleteRoomById(roomID);
 
         //then
-        assertEquals(true,result);
+        assertEquals(true, result);
         //then II
-        assertEquals(size,roomService.findRooms().size());
+        assertEquals(size, roomService.findRooms().size());
 
     }
 
@@ -132,12 +130,44 @@ public class RoomServiceTest {
     public void deleteRoomByIdThatDoesNotExists() {
         //given
         int roomID = 12;
+        boolean expectedResult = false;
 
-        // when and then
-        assertThrows(ItemNotFoundException.class, () -> roomService.deleteRoomById(roomID));
+        // when
+        boolean actualResult = roomService.deleteRoomById(roomID);
+
+        assertTrue(expectedResult == actualResult);
     }
 
     @Test
-    public void updateRoom() {
+    public void updateRoomSuccessfully() {
+        // given
+        Set<AbstractCommodity> commodities = new HashSet<>();
+        commodities.add(new Bed(BedType.KING_SIZE));
+        commodities.add(new Toilet());
+        int roomID = 2;
+        Room room = new Room(roomID, commodities);
+
+        // when
+        Room checkRoom = roomRepository.updateRoom(room);
+
+        //then
+        assertEquals(checkRoom.getCommodities().size(), room.getCommodities().size());
+    }
+
+    @Test
+    public void updateRoomUnsuccessfully() {
+        // given
+        Set<AbstractCommodity> commodities = new HashSet<>();
+        commodities.add(new Bed(BedType.KING_SIZE));
+        commodities.add(new Toilet());
+        int roomID = 8;
+        Room room = new Room(roomID, commodities);
+        Room newRoom = null;
+
+        // when and then 1
+        assertThrows(ItemNotFoundException.class, () -> roomService.updateRoom(room));
+
+        // when and then 2
+        assertThrows(FailedInitializationException.class, () -> roomService.updateRoom(newRoom));
     }
 }

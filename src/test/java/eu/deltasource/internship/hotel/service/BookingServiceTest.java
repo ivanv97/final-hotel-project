@@ -59,25 +59,14 @@ public class BookingServiceTest {
         Set<AbstractCommodity> threePeopleKingSizeSet = new HashSet<>(Arrays.asList(
                 new Bed(BedType.KING_SIZE), new Bed(SINGLE), new Toilet(), new Shower()));
 
-        // commodities for a 4 person room with 2 doubles
-        Set<AbstractCommodity> fourPersonSet = new HashSet<>(Arrays.asList(new Bed
-                (BedType.DOUBLE), new Bed(BedType.DOUBLE), new Toilet(), new Shower()));
-
-        // commodities for a 4 person room with 2 doubles
-        Set<AbstractCommodity> fivePersonSet = new HashSet<>(Arrays.asList(new Bed
-                (BedType.KING_SIZE), new Bed(BedType.DOUBLE), new Bed(SINGLE), new Toilet(), new Toilet(), new Shower()));
-
         // create some rooms
         Room doubleRoom = new Room(1, doubleSet);
         Room singleRoom = new Room(2, singleSet);
         Room kingSizeRoom = new Room(3, kingSizeSet);
         Room threePeopleKingSizeRoom = new Room(4, threePeopleKingSizeSet);
-        Room fourPersonRoom = new Room(5, fourPersonSet);
-        Room fivePersonRoom = new Room(6, fivePersonSet);
 
         // adds the rooms to the repository, which then can be accesses from the RoomService
-        roomService.saveRooms(doubleRoom, singleRoom, kingSizeRoom, threePeopleKingSizeRoom, fourPersonRoom, fivePersonRoom);
-
+        roomService.saveRooms(doubleRoom, singleRoom, kingSizeRoom, threePeopleKingSizeRoom);
 
         LocalDate firstFrom = LocalDate.of(2019, 8, 12);
         LocalDate firstTo = LocalDate.of(2019, 8, 18);
@@ -91,9 +80,7 @@ public class BookingServiceTest {
         LocalDate thirdTo = LocalDate.of(2019, 8, 18);
         Booking thirdBooking = new Booking(3, 465, 4, 3, thirdFrom, thirdTo);
 
-        bookingService.save(firstBooking);
-        bookingService.save(secondBooking);
-        bookingService.save(thirdBooking);
+        bookingService.saveAll(firstBooking, secondBooking, thirdBooking);
     }
 
     @Test
@@ -138,7 +125,6 @@ public class BookingServiceTest {
         assertThrows(ItemNotFoundException.class, () -> bookingService.deleteByID(bookingID));
     }
 
-
     @Test
     public void updateDatesSuccessfully() {
         // given
@@ -177,7 +163,7 @@ public class BookingServiceTest {
         assertEquals(bookingSize, bookingService.findAll().size());
     }
 
-    @Test
+    @Test(expected = FailedInitializationException.class)
     public void createBookingUnsuccessfully() {
         //given
         LocalDate fourthFrom = LocalDate.of(2019, 12, 12);
