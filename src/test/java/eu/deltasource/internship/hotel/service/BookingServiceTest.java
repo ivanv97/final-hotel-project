@@ -145,8 +145,6 @@ public class BookingServiceTest {
         int bookingID = 3;
         LocalDate fromDate = LocalDate.of(2019, 8, 7);
         LocalDate toDate = LocalDate.of(2019, 8, 12);
-        Booking booking = bookingRepository.findById(bookingID);
-        int roomID = booking.getRoomId();
 
         // when and then
         assertDoesNotThrow(() -> bookingService.updateBooking(bookingID, fromDate, toDate));
@@ -158,8 +156,6 @@ public class BookingServiceTest {
         int bookingID = 3;
         LocalDate fromDate = LocalDate.of(2019, 8, 15);
         LocalDate toDate = LocalDate.of(2019, 8, 18);
-        Booking booking = bookingRepository.findById(bookingID);
-        int roomID = booking.getRoomId();
 
         // when and then
         assertThrows(FailedInitializationException.class,
@@ -181,7 +177,7 @@ public class BookingServiceTest {
         assertEquals(bookingSize, bookingService.findAll().size());
     }
 
-    @Test(expected = FailedInitializationException.class)
+    @Test
     public void createBookingUnsuccessfully() {
         //given
         LocalDate fourthFrom = LocalDate.of(2019, 12, 12);

@@ -4,6 +4,8 @@ import eu.deltasource.internship.hotel.domain.Booking;
 import eu.deltasource.internship.hotel.exception.FailedInitializationException;
 import eu.deltasource.internship.hotel.exception.ItemNotFoundException;
 import eu.deltasource.internship.hotel.repository.BookingRepository;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
 
 import java.time.LocalDate;
@@ -13,6 +15,7 @@ import java.util.List;
 /**
  * Represents booking services
  */
+@Service
 public class BookingService {
 
     private final BookingRepository bookingRepository;
@@ -20,7 +23,6 @@ public class BookingService {
     private final RoomService roomService;
 
     private final GuestService guestService;
-
 
     public BookingService(BookingRepository bookingRepository, RoomService roomService, GuestService guestService) {
         this.bookingRepository = bookingRepository;
@@ -35,7 +37,7 @@ public class BookingService {
      * @return the found booking
      */
     public Booking findByID(int ID) {
-        return this.bookingRepository.findById(ID);
+        return bookingRepository.findById(ID);
     }
 
     /**
@@ -104,7 +106,7 @@ public class BookingService {
      * @return list of all bookings
      */
     public List<Booking> findAll() {
-        return this.bookingRepository.findAll();
+        return bookingRepository.findAll();
     }
 
     /**
@@ -113,6 +115,9 @@ public class BookingService {
      * @param newBooking the new booking
      */
     public void save(Booking newBooking) {
+        if (newBooking == null) {
+            throw new FailedInitializationException("Invalid booking!");
+        }
         bookingRepository.save(newBooking);
     }
 }
