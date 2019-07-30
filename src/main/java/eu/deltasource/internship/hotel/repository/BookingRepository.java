@@ -57,7 +57,7 @@ public class BookingRepository {
     }
 
     private int idGenerator() {
-        return repository.get(count()).getBookingId() + 1;
+        return repository.get(count() - 1).getBookingId() + 1;
     }
 
     public void save(Booking item) {

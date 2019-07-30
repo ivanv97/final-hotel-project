@@ -58,7 +58,7 @@ public class RoomRepository {
     }
 
     private int idGenerator() {
-        return repository.get(count()).getRoomId() + 1;
+        return repository.get(count() - 1).getRoomId() + 1;
     }
 
     public void save(Room item) {
