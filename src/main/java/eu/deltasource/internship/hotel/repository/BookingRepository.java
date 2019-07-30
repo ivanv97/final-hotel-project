@@ -12,6 +12,7 @@ import java.util.List;
 /**
  * Created by Taner Ilyazov - Delta Source Bulgaria on 2019-07-28.
  */
+@Repository
 public class BookingRepository {
 
 	private final List<Booking> repository;

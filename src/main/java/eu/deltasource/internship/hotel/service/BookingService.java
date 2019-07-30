@@ -4,6 +4,7 @@ import eu.deltasource.internship.hotel.domain.Booking;
 import eu.deltasource.internship.hotel.exception.FailedInitializationException;
 import eu.deltasource.internship.hotel.exception.ItemNotFoundException;
 import eu.deltasource.internship.hotel.repository.BookingRepository;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 
@@ -18,11 +19,10 @@ import java.util.List;
 public class BookingService {
 
 	private final BookingRepository bookingRepository;
-
 	private final RoomService roomService;
-
 	private final GuestService guestService;
 
+	@Autowired
 	public BookingService(BookingRepository bookingRepository, RoomService roomService, GuestService guestService) {
 		this.bookingRepository = bookingRepository;
 		this.roomService = roomService;
@@ -76,7 +76,7 @@ public class BookingService {
 	}
 
 	/**
-	 * Checks if the new dates overlaps the booking for the room
+	 * Checks if the new date overlaps the room's booking
 	 *
 	 * @param from        starting date
 	 * @param to          ending date
@@ -92,8 +92,8 @@ public class BookingService {
 		Period period = Period.between(from, to);
 		int totalDays = period.getDays();
 
-		if (from.plusDays(totalDays).isBefore(roomBooking.getFrom()) ||
-			from.plusDays(totalDays).isEqual(roomBooking.getFrom())) {
+		if (from.plusDays(totalDays).isBefore(roomBooking.getFrom())
+			|| from.plusDays(totalDays).isEqual(roomBooking.getFrom())) {
 			return false;
 		}
 		return true;
@@ -120,6 +120,11 @@ public class BookingService {
 		bookingRepository.save(newBooking);
 	}
 
+	/**
+	 * Creates array of bookings
+	 *
+	 * @param bookings array of bookings
+	 */
 	public void saveAll(Booking... bookings) {
 		if (bookings == null) {
 			throw new FailedInitializationException("Invalid booking!");

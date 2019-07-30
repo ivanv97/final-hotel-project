@@ -3,13 +3,14 @@ package eu.deltasource.internship.hotel.service;
 import eu.deltasource.internship.hotel.domain.Guest;
 import eu.deltasource.internship.hotel.exception.FailedInitializationException;
 import eu.deltasource.internship.hotel.repository.GuestRepository;
+import org.springframework.stereotype.Service;
 
 import java.util.List;
 
 /**
- * Created by Taner Ilyazov - Delta Source Bulgaria on 2019-07-28.
+ * Represents guest serivce
  */
-
+@Service
 public class GuestService {
 
     private final GuestRepository guestRepository;

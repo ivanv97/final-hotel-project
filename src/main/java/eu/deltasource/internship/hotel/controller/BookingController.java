@@ -1,12 +1,12 @@
 package eu.deltasource.internship.hotel.controller;
 
 import eu.deltasource.internship.hotel.domain.Booking;
-import eu.deltasource.internship.hotel.domain.Room;
 import eu.deltasource.internship.hotel.service.BookingService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDate;
 import java.util.List;
 
 @RestController
@@ -29,5 +29,15 @@ public class BookingController {
     @GetMapping("/id")
     public Booking findById(@RequestBody int ID) {
         return bookingService.findByID(ID);
+    }
+
+    @DeleteMapping("/id")
+    public boolean deleteByID(@RequestBody int ID) {
+        return bookingService.deleteByID(ID);
+    }
+
+    @PutMapping("/id")
+    public void updateBooking(@RequestBody int bookingID, LocalDate from, LocalDate to) {
+        bookingService.deleteByID(bookingID);
     }
 }

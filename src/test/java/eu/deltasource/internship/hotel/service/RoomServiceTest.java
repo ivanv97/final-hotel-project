@@ -127,6 +127,24 @@ public class RoomServiceTest {
     }
 
     @Test
+    public void saveRoomsUnsuccessfully() {
+        //given
+        Room[] rooms = null;
+
+        // when and then
+        assertThrows(FailedInitializationException.class, () -> roomService.saveRooms(rooms));
+    }
+
+    @Test
+    public void saveRoomUnsuccessfully() {
+        //given
+        Room room = null;
+
+        // when and then
+        assertThrows(FailedInitializationException.class, () -> roomService.saveRoom(room));
+    }
+
+    @Test
     public void deleteRoomByIdThatDoesNotExists() {
         //given
         int roomID = 12;
