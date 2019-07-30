@@ -1,4 +1,4 @@
-package eu.deltasource.internship.hotel.controllers;
+package eu.deltasource.internship.hotel.controller;
 
 import eu.deltasource.internship.hotel.domain.Guest;
 import eu.deltasource.internship.hotel.service.GuestService;
