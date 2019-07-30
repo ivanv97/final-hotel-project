@@ -5,6 +5,7 @@ import eu.deltasource.internship.hotel.domain.Guest;
 import eu.deltasource.internship.hotel.exception.FailedInitializationException;
 import eu.deltasource.internship.hotel.exception.ItemNotFoundException;
 import eu.deltasource.internship.hotel.repository.GuestRepository;
+
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.BeforeEach;
@@ -42,7 +43,7 @@ public class GuestServiceTest {
         Guest expectedGuest = guestService.findById(guestId);
 
         //then
-        assertTrue(expectedGuest.equals(firstGuest));
+        assertEquals(expectedGuest, firstGuest);
     }
 
     @Test
@@ -60,13 +61,12 @@ public class GuestServiceTest {
         //given
         // two guests already exist
         int id = 1;
-        boolean expectedResult = true;
 
         //when
         boolean result = guestService.deleteById(id);
 
         //then
-        assertEquals(expectedResult, result);
+		assertTrue(result);
         assertThrows(ItemNotFoundException.class, () -> guestService.findById(id));
     }
 

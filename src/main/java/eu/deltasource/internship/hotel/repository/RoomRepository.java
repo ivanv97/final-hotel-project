@@ -3,7 +3,6 @@ package eu.deltasource.internship.hotel.repository;
 import eu.deltasource.internship.hotel.domain.Room;
 import eu.deltasource.internship.hotel.exception.ItemNotFoundException;
 import org.springframework.stereotype.Repository;
-import org.springframework.web.bind.annotation.RequestBody;
 
 import java.util.ArrayList;
 import java.util.Arrays;
