@@ -25,10 +25,6 @@ public class RoomController {
 		return this.roomService.findRooms();
 	}
 
-	@PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE)
-	public void saveRoom(@RequestBody Room room) {
-		roomService.saveRoom(room);
-	}
 
 	@PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE)
 	public void saveRooms(@RequestBody Room... rooms) {

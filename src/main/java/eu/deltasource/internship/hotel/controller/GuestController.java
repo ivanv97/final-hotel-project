@@ -36,16 +36,6 @@ public class GuestController {
 	}
 
 	@PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE)
-	public void save(@RequestBody Guest item) {
-		this.guestService.save(item);
-	}
-
-	@PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE)
-	public void saveAll(@RequestBody Guest... items) {
-		this.guestService.saveAll(items);
-	}
-
-	@PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE)
 	public void saveAll(@RequestBody List<Guest> items) {
 		this.guestService.saveAll(items);
 	}
