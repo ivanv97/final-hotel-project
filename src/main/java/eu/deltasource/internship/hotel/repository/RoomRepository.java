@@ -57,12 +57,12 @@ public class RoomRepository {
         throw new ItemNotFoundException("A Room with id: " + id + " was not found!");
     }
 
-    /**
-     * Saves the item in the repository with a new id
-     * using the item count in the repository
-     */
+    private int idGenerator() {
+        return repository.get(count()).getRoomId() + 1;
+    }
+
     public void save(Room item) {
-        Room newRoom = new Room(count() + 1, item.getCommodities());
+        Room newRoom = new Room(idGenerator(), item.getCommodities());
         repository.add(newRoom);
     }
 
@@ -81,16 +81,14 @@ public class RoomRepository {
         saveAll(Arrays.asList(items));
     }
 
-    /**
-     * Updates the commodities of a Room
-     * All validations should be done in the service layer!!!
-     * <p>
-     * Returns a copy of the updated item
-     */
     public Room updateRoom(Room item) {
-        Room updatedRoom = findById(item.getRoomId());
-        updatedRoom.updateCommodities(item.getCommodities());
-        return new Room(updatedRoom);
+        for (Room room : repository) {
+            if (room.getRoomId() == item.getRoomId()) {
+                room.updateCommodities(item.getCommodities());
+                return new Room(room);
+            }
+        }
+        throw new ItemNotFoundException("Room not found in repository!");
     }
 
     /**
@@ -104,16 +102,13 @@ public class RoomRepository {
         return repository.remove(item);
     }
 
-    /**
-     * Removes the item in the repository
-     * with a matching id.
-     * <p>
-     * Returns true if there's a match and is deleted,
-     * returns false if there's no match and the list is unchanged.
-     */
     public boolean deleteById(int id) {
-        Room item = findById(id);
-        return delete(item);
+        for (Room room : repository) {
+            if (room.getRoomId() == id) {
+                return delete(room);
+            }
+        }
+        return false;
     }
 
     /**

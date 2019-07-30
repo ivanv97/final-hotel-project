@@ -34,7 +34,7 @@ public class BookingRepository {
     /**
      * Method, which checks the repository if
      * there is an item available with the given id.
-     *
+     * <p>
      * Check this always, before using operations with id's.
      */
     public boolean existsById(int id) {
@@ -56,12 +56,12 @@ public class BookingRepository {
         throw new ItemNotFoundException("A booking with id: " + id + " was not found!");
     }
 
-    /**
-     * Saves the item in the repository with a new id
-     * using the item count in the repository
-     */
+    private int idGenerator() {
+        return repository.get(count()).getBookingId() + 1;
+    }
+
     public void save(Booking item) {
-        Booking newBooking = new Booking(count() + 1, item.getGuestId(), item.getRoomId(),
+        Booking newBooking = new Booking(idGenerator(), item.getGuestId(), item.getRoomId(),
                 item.getNumberOfPeople(), item.getFrom(), item.getTo());
         repository.add(newBooking);
     }
@@ -81,19 +81,14 @@ public class BookingRepository {
         saveAll(Arrays.asList(items));
     }
 
-    /**
-     * Updates the dates of a given booking
-     * <p>
-     * You can only update the Date of a booking,
-     * if you need to update something else a new
-     * Booking has to be created and this one needs to be removed.
-     * <p>
-     * All validations should be done in the service layer!!!
-     */
     public Booking updateDates(Booking item) {
-        Booking updatedBooking = findById(item.getBookingId());
-        updatedBooking.setBookingDates(item.getFrom(), item.getTo());
-        return updatedBooking;
+        for (Booking booking : repository) {
+            if (booking.getBookingId() == item.getBookingId()) {
+                booking.setBookingDates(item.getFrom(), item.getTo());
+                return new Booking(booking);
+            }
+        }
+        throw new ItemNotFoundException("Booking not found in repository!");
     }
 
     /**
@@ -107,16 +102,13 @@ public class BookingRepository {
         return repository.remove(item);
     }
 
-    /**
-     * Removes the item in the repository
-     * matching the given id.
-     * <p>
-     * Returns true if there's a match and is deleted,
-     * returns false if there's no match and the list is unchanged.
-     */
     public boolean deleteById(int id) {
-        Booking item = findById(id);
-        return delete(item);
+        for (Booking booking : repository) {
+            if (booking.getGuestId() == id) {
+                return delete(booking);
+            }
+        }
+        return false;
     }
 
     /**
