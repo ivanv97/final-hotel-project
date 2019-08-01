@@ -2,7 +2,6 @@ package eu.deltasource.internship.hotel.controller;
 
 
 import eu.deltasource.internship.hotel.domain.Booking;
-import eu.deltasource.internship.hotel.domain.Date;
 import eu.deltasource.internship.hotel.service.BookingService;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -29,12 +28,12 @@ public class BookingController {
 
     @GetMapping(value = "/{ID}")
     public Booking findById(@PathVariable("ID") int ID) {
-        return bookingService.findByID(ID);
+        return bookingService.findById(ID);
     }
 
     @DeleteMapping(value = "/{ID}")
     public boolean deleteByID(@PathVariable("ID") int ID) {
-        return bookingService.deleteByID(ID);
+        return bookingService.deleteById(ID);
     }
 
     @PutMapping(value = "/{ID}")

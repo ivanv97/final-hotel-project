@@ -1,4 +1,4 @@
-package eu.deltasource.internship.hotel.domain;
+package eu.deltasource.internship.hotel.controller;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;

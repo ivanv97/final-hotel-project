@@ -3,6 +3,7 @@ package eu.deltasource.internship.hotel.service;
 import eu.deltasource.internship.hotel.domain.Booking;
 import eu.deltasource.internship.hotel.domain.Room;
 import eu.deltasource.internship.hotel.domain.commodity.*;
+import eu.deltasource.internship.hotel.exception.BookingOverlappingException;
 import eu.deltasource.internship.hotel.exception.FailedInitializationException;
 import eu.deltasource.internship.hotel.exception.ItemNotFoundException;
 import eu.deltasource.internship.hotel.repository.BookingRepository;
@@ -52,6 +53,7 @@ public class BookingServiceTest {
         // adds the rooms to the repository which then can be accessed from  RoomService
         roomService.saveRooms(doubleRoom, singleRoom, kingSizeRoom);
 
+        /*
         LocalDate firstFrom = LocalDate.of(2019, 8, 15);
         LocalDate firstTo = LocalDate.of(2019, 8, 18);
         Booking firstBooking = new Booking(1, 101, 1,
@@ -59,11 +61,13 @@ public class BookingServiceTest {
 
         LocalDate secondFrom = LocalDate.of(2019, 9, 18);
         LocalDate secondTo = LocalDate.of(2019, 9, 21);
-        Booking secondBooking = new Booking(2, 345, 4,
+        Booking secondBooking = new Booking(12, 345, 4,
                 3, secondFrom, secondTo);
 
         // adds the bookings to the repository which then can be accessed from BookingService
         bookingService.saveAll(firstBooking, secondBooking);
+
+         */
     }
 
     @Test
@@ -77,7 +81,7 @@ public class BookingServiceTest {
         int bookingID = 3;
 
         //when
-        Booking booking = bookingService.findByID(bookingID);
+        Booking booking = bookingService.findById(bookingID);
 
         // then
         assertTrue(bookingID == booking.getBookingId());
@@ -89,7 +93,7 @@ public class BookingServiceTest {
         int bookID = -5;
 
         //when and then
-        assertThrows(ItemNotFoundException.class, () -> bookingService.findByID(bookID));
+        assertThrows(ItemNotFoundException.class, () -> bookingService.findById(bookID));
     }
 
     @Test
@@ -98,7 +102,7 @@ public class BookingServiceTest {
         int bookingID = 2;
 
         //when
-        boolean result = bookingService.deleteByID(bookingID);
+        boolean result = bookingService.deleteById(bookingID);
 
         // then
         assertEquals(true, result);
@@ -110,7 +114,7 @@ public class BookingServiceTest {
         int bookingID = 56;
 
         //when and then
-        assertThrows(ItemNotFoundException.class, () -> bookingService.deleteByID(bookingID));
+        assertThrows(ItemNotFoundException.class, () -> bookingService.deleteById(bookingID));
     }
 
     @Test
@@ -124,6 +128,42 @@ public class BookingServiceTest {
         assertDoesNotThrow(() -> bookingService.updateBooking(bookingID, fromDate, toDate));
     }
 
+
+    @Test
+    public void updateDatesTest() {
+        // given
+    /*    int bookingID = 1;
+        LocalDate secondFrom = LocalDate.of(2019, 9, 1);
+        LocalDate secondTo = LocalDate.of(2019, 9, 5);
+        Booking secondBooking = new Booking(bookingID, 345, 4,
+                3, secondFrom, secondTo);
+        bookingService.save(secondBooking);
+
+        LocalDate from = LocalDate.of(2019, 9, 2);
+        LocalDate to = LocalDate.of(2019, 9, 4);
+
+        // when and then 1 /Efrem/
+
+        assertThrows(BookingOverlappingException.class,
+                () -> bookingService.updateBooking(bookingID, from, to));
+*/
+        int bookingID = 1;
+        LocalDate secondFrom = LocalDate.of(2019, 9, 11);
+        LocalDate secondTo = LocalDate.of(2019, 9, 15);
+        Booking secondBooking = new Booking(bookingID, 345, 4,
+                3, secondFrom, secondTo);
+        bookingService.save(secondBooking);
+
+        LocalDate from = LocalDate.of(2019, 9, 1);
+        LocalDate to = LocalDate.of(2019, 9, 5);
+
+        // when /Taner/
+        Booking booking = bookingService.updateBooking(bookingID, from, to);
+
+        // then /Taner/
+        assertTrue(booking.equals(secondBooking));
+    }
+
     @Test
     public void updateDatesUnsuccessfullyOverlapping() {
         // given
@@ -132,14 +172,14 @@ public class BookingServiceTest {
         LocalDate toDate = LocalDate.of(2019, 8, 18);
 
         // when and then 1
-        assertThrows(FailedInitializationException.class,
+        assertThrows(BookingOverlappingException.class,
                 () -> bookingService.updateBooking(bookingID, fromDate, toDate));
 
         // when and then 2
         LocalDate from = LocalDate.of(2019, 8, 3);
         LocalDate to = LocalDate.of(2019, 8, 17);
 
-        assertThrows(FailedInitializationException.class,
+        assertThrows(BookingOverlappingException.class,
                 () -> bookingService.updateBooking(bookingID, from, to));
     }
 

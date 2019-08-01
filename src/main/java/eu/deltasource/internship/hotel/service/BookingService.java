@@ -1,6 +1,7 @@
 package eu.deltasource.internship.hotel.service;
 
 import eu.deltasource.internship.hotel.domain.Booking;
+import eu.deltasource.internship.hotel.exception.BookingOverlappingException;
 import eu.deltasource.internship.hotel.exception.FailedInitializationException;
 import eu.deltasource.internship.hotel.exception.ItemNotFoundException;
 import eu.deltasource.internship.hotel.repository.BookingRepository;
@@ -32,50 +33,66 @@ public class BookingService {
 	}
 
 	/**
-	 * Searches booking by ID
+	 * Searches booking by id
 	 *
-	 * @param ID booking's ID
+	 * @param id booking's id
 	 * @return the found booking
 	 */
-	public Booking findByID(int ID) {
-		return bookingRepository.findById(ID);
-	}
-
-	/**
-	 * Deletes booking by ID
-	 *
-	 * @param ID booking's ID
-	 */
-	public boolean deleteByID(int ID) {
-		if (bookingRepository.deleteById(ID)) {
-			return true;
+	public Booking findById(int id) {
+		if (bookingRepository.existsById(id)) {
+			return bookingRepository.findById(id);
 		}
-		throw new ItemNotFoundException("Booking with such ID does not exist!");
+		throw new ItemNotFoundException("Invalid id");
 	}
 
 	/**
-	 * Updates existing booking
+	 * Deletes booking by id
 	 *
-	 * @param bookingID booking's ID
+	 * @param id booking's id
+	 */
+	public boolean deleteById(int id) {
+		if (bookingRepository.existsById(id)) {
+			return bookingRepository.deleteById(id);
+		}
+		throw new ItemNotFoundException("Booking with such id does not exist!");
+	}
+
+	/**
+	 * Updates existing booking by dates
+	 *
+	 * @param bookingId booking's ID
 	 * @param from      starting date
 	 * @param to        ending date
+	 * @return the new booking
 	 */
-	public void updateBooking(int bookingID, LocalDate from, LocalDate to) {
-		if (from.isAfter(to) || from.equals(to)) {
+	public Booking updateBooking(int bookingId, LocalDate from, LocalDate to) {
+
+		if (!dateValidation(from, to)) {
 			throw new FailedInitializationException("Invalid dates!");
 		}
+		Booking booking = bookingRepository.findById(bookingId);
 
-		Booking booking = bookingRepository.findById(bookingID);
-		int roomID = booking.getRoomId();
+		if (!bookingOverlappingValidation(from, to, booking)) {
+			booking.setBookingDates(from, to);
+			return bookingRepository.updateDates(booking);
+		}
+		throw new BookingOverlappingException("Invalid Booking!");
+	}
 
-		for (Booking book : bookingRepository.findAll()) {
-			if (roomID == book.getRoomId() && checkOverlapping(from, to, book)) {
-				throw new FailedInitializationException("Dates are overlapped!");
-			}
+
+	public Booking updateBookingByRoomId(int newRoomID, int bookingId, Booking newBooking) {
+		if (!bookingValidation(newBooking)) {
+			throw new FailedInitializationException("Invalid Booking!");
 		}
 
-		booking.setBookingDates(from, to);
-		bookingRepository.updateDates(booking);
+		int searchedRoomId = roomService.getRoomById(newRoomID).getRoomId();
+		int currentBookingRoomID = bookingRepository.findById(bookingId).getRoomId();
+
+		if (bookingRepository.existsById(bookingId) && (currentBookingRoomID == searchedRoomId)) {
+			deleteById(bookingId);
+
+		}
+		throw new ItemNotFoundException("Invalid Id");
 	}
 
 	/**
@@ -117,7 +134,7 @@ public class BookingService {
 	 * @param newBooking the new booking
 	 */
 	public void save(Booking newBooking) {
-		if (newBooking == null) {
+		if (!bookingValidation(newBooking)) {
 			throw new FailedInitializationException("Invalid booking!");
 		}
 		bookingRepository.save(newBooking);
@@ -129,9 +146,32 @@ public class BookingService {
 	 * @param bookings array of bookings
 	 */
 	public void saveAll(Booking... bookings) {
-		if (bookings == null) {
+		if (!bookingValidation(bookings)) {
 			throw new FailedInitializationException("Invalid bookings!");
 		}
 		bookingRepository.saveAll(bookings);
+	}
+
+	private boolean dateValidation(LocalDate from, LocalDate to) {
+		if (from.isAfter(to) || from.equals(to) || from == null || to == null)
+			return false;
+		return true;
+	}
+
+	private boolean bookingOverlappingValidation(LocalDate from, LocalDate to, Booking booking) {
+		int roomID = booking.getRoomId();
+
+		for (Booking book : bookingRepository.findAll()) {
+			if (roomID == book.getRoomId() && checkOverlapping(from, to, book)) {
+				return true;
+			}
+		}
+		return false;
+	}
+
+	private boolean bookingValidation(Booking... booking) {
+		if (booking == null)
+			return false;
+		return true;
 	}
 }

@@ -27,7 +27,10 @@ public class RoomService {
      * @return the room with that ID
      */
     public Room getRoomById(int id) {
-        return roomRepository.findById(id);
+        if (roomRepository.existsById(id)) {
+            return roomRepository.findById(id);
+        }
+        throw new ItemNotFoundException("Invalid room id");
     }
 
     /**
@@ -85,7 +88,10 @@ public class RoomService {
      * @return true if the room was successfully deleted/removed
      */
     public boolean deleteRoomById(int id) {
-        return roomRepository.deleteById(id);
+        if (roomRepository.existsById(id)) {
+            return roomRepository.deleteById(id);
+        }
+        throw new ItemNotFoundException("Room with such ID does not exist!");
     }
 
     /**

@@ -10,7 +10,7 @@ import eu.deltasource.internship.hotel.exception.FailedInitializationException;
 import java.time.LocalDate;
 
 /**
- * Created by Taner Ilyazov - Delta Source Bulgaria on 2019-07-28.
+ * Represents a booking
  */
 public class Booking {
 

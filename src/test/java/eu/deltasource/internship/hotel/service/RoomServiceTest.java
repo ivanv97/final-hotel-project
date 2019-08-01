@@ -24,9 +24,9 @@ public class RoomServiceTest {
     BookingRepository bookingRepository = new BookingRepository();
     GuestRepository guestRepository = new GuestRepository();
     RoomRepository roomRepository = new RoomRepository();
-    RoomService roomService=new RoomService(roomRepository);
-    GuestService guestService=new GuestService(guestRepository);
-    BookingService bookingService=new BookingService(bookingRepository, roomService, guestService);
+    RoomService roomService = new RoomService(roomRepository);
+    GuestService guestService = new GuestService(guestRepository);
+    BookingService bookingService = new BookingService(bookingRepository, roomService, guestService);
 
     @Before
     public void setUp() {
@@ -141,10 +141,9 @@ public class RoomServiceTest {
         int roomID = 12;
         boolean expectedResult = false;
 
-        // when
-        boolean actualResult = roomService.deleteRoomById(roomID);
-
-        assertTrue(expectedResult == actualResult);
+        //then
+        assertThrows(ItemNotFoundException.class,
+                () -> roomService.deleteRoomById(roomID));
     }
 
     @Test
@@ -194,7 +193,7 @@ public class RoomServiceTest {
         //given
         Set<AbstractCommodity> commodities = new HashSet<>();
         commodities.add(new Bed(BedType.KING_SIZE));
-        int roomID=3;
+        int roomID = 3;
         Room threePeopleKingSizeRoom = new Room(roomID, commodities);
 
         //when
