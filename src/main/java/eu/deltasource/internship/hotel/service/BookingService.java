@@ -80,17 +80,38 @@ public class BookingService {
 	}
 
 
-	public Booking updateBookingByRoomId(int newRoomID, int bookingId, Booking newBooking) {
+	/**
+	 * Updates booking by Id
+	 *
+	 * @param bookingId  search room id by booking id
+	 * @param newBooking the new booking
+	 */
+	public void updateBookingByRoomId(int bookingId, Booking newBooking) {
 		if (!bookingValidation(newBooking)) {
 			throw new FailedInitializationException("Invalid Booking!");
 		}
 
-		int searchedRoomId = roomService.getRoomById(newRoomID).getRoomId();
+		int searchedRoomId = roomService.getRoomById(newBooking.getRoomId()).getRoomId();
 		int currentBookingRoomID = bookingRepository.findById(bookingId).getRoomId();
 
 		if (bookingRepository.existsById(bookingId) && (currentBookingRoomID == searchedRoomId)) {
 			deleteById(bookingId);
+			bookingRepository.save(newBooking);
+		}
+		throw new ItemNotFoundException("Invalid Id");
+	}
 
+	public void updateBookingByRoomId(int bookingId, Booking newBooking) {
+		if (!bookingValidation(newBooking)) {
+			throw new FailedInitializationException("Invalid Booking!");
+		}
+
+		int searchedRoomId = roomService.getRoomById(newBooking.getRoomId()).getRoomId();
+		int currentBookingRoomID = bookingRepository.findById(bookingId).getRoomId();
+
+		if (bookingRepository.existsById(bookingId) && (currentBookingRoomID == searchedRoomId)) {
+			deleteById(bookingId);
+			bookingRepository.save(newBooking);
 		}
 		throw new ItemNotFoundException("Invalid Id");
 	}
