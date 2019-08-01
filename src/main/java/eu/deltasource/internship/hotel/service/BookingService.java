@@ -19,7 +19,9 @@ import java.util.List;
 public class BookingService {
 
 	private final BookingRepository bookingRepository;
+
 	private final RoomService roomService;
+
 	private final GuestService guestService;
 
 	@Autowired
@@ -48,7 +50,7 @@ public class BookingService {
 		if (bookingRepository.deleteById(ID)) {
 			return true;
 		}
-		throw new ItemNotFoundException("Booking with such ID does not exits!");
+		throw new ItemNotFoundException("Booking with such ID does not exist!");
 	}
 
 	/**
@@ -59,7 +61,7 @@ public class BookingService {
 	 * @param to        ending date
 	 */
 	public void updateBooking(int bookingID, LocalDate from, LocalDate to) {
-		if (from == null || to == null || from.isAfter(to) || from.equals(to)) {
+		if (from.isAfter(to) || from.equals(to)) {
 			throw new FailedInitializationException("Invalid dates!");
 		}
 
@@ -71,8 +73,9 @@ public class BookingService {
 				throw new FailedInitializationException("Dates are overlapped!");
 			}
 		}
+
 		booking.setBookingDates(from, to);
-		bookingRepository.save(booking);
+		bookingRepository.updateDates(booking);
 	}
 
 	/**
@@ -84,7 +87,7 @@ public class BookingService {
 	 * @return
 	 */
 	public boolean checkOverlapping(LocalDate from, LocalDate to, Booking roomBooking) {
-		// not interested
+
 		if (from.isAfter(roomBooking.getFrom()) && to.isAfter(roomBooking.getTo())) {
 			return false;
 		}
@@ -127,7 +130,7 @@ public class BookingService {
 	 */
 	public void saveAll(Booking... bookings) {
 		if (bookings == null) {
-			throw new FailedInitializationException("Invalid booking!");
+			throw new FailedInitializationException("Invalid bookings!");
 		}
 		bookingRepository.saveAll(bookings);
 	}

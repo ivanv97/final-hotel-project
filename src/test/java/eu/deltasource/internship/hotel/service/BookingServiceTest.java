@@ -26,26 +26,15 @@ public class BookingServiceTest {
     BookingRepository bookingRepository = new BookingRepository();
     GuestRepository guestRepository = new GuestRepository();
     RoomRepository roomRepository = new RoomRepository();
-    RoomService roomService;
-    GuestService guestService;
-    BookingService bookingService;
+    RoomService roomService = new RoomService(roomRepository);
+    GuestService guestService = new GuestService(guestRepository);
+    BookingService bookingService = new BookingService(bookingRepository, roomService, guestService);
 
     @Before
     public void setUp() {
-
-        // Initialize Services
-        roomService = new RoomService(roomRepository);
-        guestService = new GuestService(guestRepository);
-        bookingService = new BookingService(bookingRepository, roomService, guestService);
-
-        // Filling up hotel with ready rooms to use
-
         // Commodities for a double room
-        AbstractCommodity doubleBed = new Bed(BedType.DOUBLE);
-        AbstractCommodity toilet = new Toilet();
-        AbstractCommodity shower = new Shower();
-
-        Set<AbstractCommodity> doubleSet = new HashSet<>(Arrays.asList(doubleBed, toilet, shower));
+        Set<AbstractCommodity> doubleSet = new HashSet<>(Arrays.asList
+                (new Bed(BedType.DOUBLE), new Toilet(), new Shower()));
 
         // commodities for a single room
         Set<AbstractCommodity> singleSet = new HashSet<>(Arrays.asList
@@ -55,37 +44,36 @@ public class BookingServiceTest {
         Set<AbstractCommodity> kingSizeSet = new HashSet<>(Arrays.asList
                 (new Bed(BedType.KING_SIZE), new Toilet(), new Shower()));
 
-        // commodities for a 3 person room with a king size and a single
-        Set<AbstractCommodity> threePeopleKingSizeSet = new HashSet<>(Arrays.asList(
-                new Bed(BedType.KING_SIZE), new Bed(SINGLE), new Toilet(), new Shower()));
-
         // create some rooms
         Room doubleRoom = new Room(1, doubleSet);
         Room singleRoom = new Room(2, singleSet);
         Room kingSizeRoom = new Room(3, kingSizeSet);
-        Room threePeopleKingSizeRoom = new Room(4, threePeopleKingSizeSet);
 
-        // adds the rooms to the repository, which then can be accesses from the RoomService
-        roomService.saveRooms(doubleRoom, singleRoom, kingSizeRoom, threePeopleKingSizeRoom);
+        // adds the rooms to the repository which then can be accessed from  RoomService
+        roomService.saveRooms(doubleRoom, singleRoom, kingSizeRoom);
 
-        LocalDate firstFrom = LocalDate.of(2019, 8, 12);
+        LocalDate firstFrom = LocalDate.of(2019, 8, 15);
         LocalDate firstTo = LocalDate.of(2019, 8, 18);
-        Booking firstBooking = new Booking(1, 101, 1, 3, firstFrom, firstTo);
+        Booking firstBooking = new Booking(1, 101, 1,
+                3, firstFrom, firstTo);
 
         LocalDate secondFrom = LocalDate.of(2019, 9, 18);
         LocalDate secondTo = LocalDate.of(2019, 9, 21);
-        Booking secondBooking = new Booking(2, 345, 4, 3, secondFrom, secondTo);
+        Booking secondBooking = new Booking(2, 345, 4,
+                3, secondFrom, secondTo);
 
-        LocalDate thirdFrom = LocalDate.of(2019, 8, 15);
-        LocalDate thirdTo = LocalDate.of(2019, 8, 18);
-        Booking thirdBooking = new Booking(3, 465, 4, 3, thirdFrom, thirdTo);
-
-        bookingService.saveAll(firstBooking, secondBooking, thirdBooking);
+        // adds the bookings to the repository which then can be accessed from BookingService
+        bookingService.saveAll(firstBooking, secondBooking);
     }
 
     @Test
     public void findByID() {
         //given
+        LocalDate thirdFrom = LocalDate.of(2019, 9, 4);
+        LocalDate thirdTo = LocalDate.of(2019, 9, 7);
+        Booking thirdBooking = new Booking(3, 465, 4,
+                3, thirdFrom, thirdTo);
+        bookingService.save(thirdBooking);
         int bookingID = 3;
 
         //when
@@ -107,7 +95,7 @@ public class BookingServiceTest {
     @Test
     public void deleteByExistingID() {
         //given
-        int bookingID = 3;
+        int bookingID = 2;
 
         //when
         boolean result = bookingService.deleteByID(bookingID);
@@ -121,14 +109,14 @@ public class BookingServiceTest {
         //given
         int bookingID = 56;
 
-        //when
+        //when and then
         assertThrows(ItemNotFoundException.class, () -> bookingService.deleteByID(bookingID));
     }
 
     @Test
     public void updateDatesSuccessfully() {
         // given
-        int bookingID = 3;
+        int bookingID = 1;
         LocalDate fromDate = LocalDate.of(2019, 8, 7);
         LocalDate toDate = LocalDate.of(2019, 8, 12);
 
@@ -137,24 +125,31 @@ public class BookingServiceTest {
     }
 
     @Test
-    public void updateDatesUnsuccessfully() {
+    public void updateDatesUnsuccessfullyOverlapping() {
         // given
-        int bookingID = 3;
+        int bookingID = 1;
         LocalDate fromDate = LocalDate.of(2019, 8, 15);
         LocalDate toDate = LocalDate.of(2019, 8, 18);
 
-        // when and then
+        // when and then 1
         assertThrows(FailedInitializationException.class,
                 () -> bookingService.updateBooking(bookingID, fromDate, toDate));
+
+        // when and then 2
+        LocalDate from = LocalDate.of(2019, 8, 3);
+        LocalDate to = LocalDate.of(2019, 8, 17);
+
+        assertThrows(FailedInitializationException.class,
+                () -> bookingService.updateBooking(bookingID, from, to));
     }
 
     @Test
     public void createBookingSuccessfully() {
         //given
-        LocalDate fourthFrom = LocalDate.of(2019, 10, 3);
-        LocalDate fourthTo = LocalDate.of(2019, 10, 8);
-        Booking newBooking = new Booking(4, 583, 6, 5, fourthFrom, fourthTo);
-        int bookingSize = 4;
+        LocalDate from = LocalDate.of(2019, 10, 3);
+        LocalDate to = LocalDate.of(2019, 10, 8);
+        Booking newBooking = new Booking(4, 583, 6, 5, from, to);
+        int bookingSize = 3;
 
         // when
         bookingService.save(newBooking);
@@ -163,12 +158,41 @@ public class BookingServiceTest {
         assertEquals(bookingSize, bookingService.findAll().size());
     }
 
+    @Test
+    public void createBookingsNullCheck() {
+        // given
+        Booking[] bookings = null;
+
+        assertThrows(FailedInitializationException.class, () -> bookingService.saveAll(bookings));
+    }
+
     @Test(expected = FailedInitializationException.class)
     public void createBookingUnsuccessfully() {
         //given
-        LocalDate fourthFrom = LocalDate.of(2019, 12, 12);
-        LocalDate fourthTo = LocalDate.of(2019, 12, 8);
-        Booking newBooking = new Booking(4, 583, 6, 5, fourthFrom, fourthTo);
+        LocalDate from = LocalDate.of(2019, 12, 12);
+        LocalDate to = LocalDate.of(2019, 12, 8);
+        Booking newBooking = new Booking(4, 583, 6, 5, from, to);
+
+        // when and then
+        assertThrows(FailedInitializationException.class, () -> bookingService.save(newBooking));
+    }
+
+    @Test
+    public void saveNullCheck() {
+        //given
+        Booking booking = null;
+
+        //when and then
+        assertThrows(FailedInitializationException.class, () -> bookingService.save(booking));
+    }
+
+    @Test(expected = FailedInitializationException.class)
+    public void updateBookingInvalidDates() {
+        //given
+        LocalDate fourthFrom = LocalDate.of(2019, 10, 12);
+        LocalDate fourthTo = LocalDate.of(2019, 10, 4);
+        Booking newBooking = new Booking(4, 583, 6,
+                5, fourthFrom, fourthTo);
 
         // when and then
         assertThrows(FailedInitializationException.class, () -> bookingService.save(newBooking));
@@ -177,7 +201,7 @@ public class BookingServiceTest {
     @Test
     public void findAll() {
         // given
-        int sizeOfBookings = 3;
+        int sizeOfBookings = 2;
 
         // when and then
         assertEquals(sizeOfBookings, bookingService.findAll().size());

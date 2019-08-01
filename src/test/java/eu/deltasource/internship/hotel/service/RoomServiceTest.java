@@ -24,20 +24,13 @@ public class RoomServiceTest {
     BookingRepository bookingRepository = new BookingRepository();
     GuestRepository guestRepository = new GuestRepository();
     RoomRepository roomRepository = new RoomRepository();
-    RoomService roomService;
-    GuestService guestService;
-    BookingService bookingService;
+    RoomService roomService=new RoomService(roomRepository);
+    GuestService guestService=new GuestService(guestRepository);
+    BookingService bookingService=new BookingService(bookingRepository, roomService, guestService);
 
     @Before
     public void setUp() {
-
-        // Initialize Services
-        roomService = new RoomService(roomRepository);
-        guestService = new GuestService(guestRepository);
-        bookingService = new BookingService(bookingRepository, roomService, guestService);
-
         // Commodities for a double room
-
         Set<AbstractCommodity> doubleSet = new HashSet<>(Arrays.asList(new Bed(DOUBLE), new Toilet(), new Shower()));
 
         // commodities for a single room
@@ -53,10 +46,9 @@ public class RoomServiceTest {
         Room doubleRoom = new Room(1, doubleSet);
         Room singleRoom = new Room(2, singleSet);
         Room kingSizeRoom = new Room(3, kingSizeSet);
-        Room threePeopleKingSizeRoom = new Room(4, threePeopleKingSizeSet);
 
-        // adds the rooms to the repository, which then can be accesses from the RoomService
-        roomService.saveRooms(doubleRoom, singleRoom, kingSizeRoom, threePeopleKingSizeRoom);
+        // adds the rooms to the repository, which then can be accessed from RoomService
+        roomService.saveRooms(doubleRoom, singleRoom, kingSizeRoom);
     }
 
     @Test
@@ -76,7 +68,6 @@ public class RoomServiceTest {
         //given
         Set<AbstractCommodity> kingSizeSet = new HashSet<>(Arrays.asList(new Bed(BedType.KING_SIZE), new Toilet(), new Shower()));
         int roomID = 7;
-        Room room = new Room(roomID, kingSizeSet);
 
         //when and then
         assertThrows(ItemNotFoundException.class, () -> roomService.getRoomById(roomID));
@@ -85,7 +76,7 @@ public class RoomServiceTest {
     @Test
     public void findRooms() {
         //given
-        int numberOfRooms = 4;
+        int numberOfRooms = 3;
 
         //when
         List<Room> rooms = roomService.findRooms();
@@ -107,27 +98,27 @@ public class RoomServiceTest {
         Room newRoom = roomService.saveRoom(room);
 
         //then
-        assertEquals(roomID, roomService.getRoomById(roomID).getRoomId());
+        assertEquals(newRoom.getRoomId(), roomService.getRoomById(roomID).getRoomId());
     }
 
     @Test
     public void deleteRoomByExistingId() {
         // given
-        int roomID = 2;
-        int size = 3;
+        int roomID = 1;
+        int size = 2;
 
         // when
         boolean result = roomService.deleteRoomById(roomID);
 
         //then
         assertEquals(true, result);
-        //then II
-        assertEquals(size, roomService.findRooms().size());
 
+        //then 2
+        assertEquals(size, roomService.findRooms().size());
     }
 
     @Test
-    public void saveRoomsUnsuccessfully() {
+    public void saveRoomsNullCheck() {
         //given
         Room[] rooms = null;
 
@@ -136,7 +127,7 @@ public class RoomServiceTest {
     }
 
     @Test
-    public void saveRoomUnsuccessfully() {
+    public void saveRoomNullCheck() {
         //given
         Room room = null;
 
@@ -145,7 +136,7 @@ public class RoomServiceTest {
     }
 
     @Test
-    public void deleteRoomByIdThatDoesNotExists() {
+    public void deleteRoomByIdThatDoesNotExist() {
         //given
         int roomID = 12;
         boolean expectedResult = false;
@@ -166,7 +157,7 @@ public class RoomServiceTest {
         Room room = new Room(roomID, commodities);
 
         // when
-        Room checkRoom = roomRepository.updateRoom(room);
+        Room checkRoom = roomService.updateRoom(room);
 
         //then
         assertEquals(checkRoom.getCommodities().size(), room.getCommodities().size());
@@ -185,7 +176,31 @@ public class RoomServiceTest {
         // when and then 1
         assertThrows(ItemNotFoundException.class, () -> roomService.updateRoom(room));
 
-        // when and then 2
+        // when and then 2 (null check)
         assertThrows(FailedInitializationException.class, () -> roomService.updateRoom(newRoom));
+    }
+
+    @Test
+    public void deleteRoomNullCheck() {
+        // given
+        Room room = null;
+
+        //when and then
+        assertThrows(FailedInitializationException.class, () -> roomService.deleteRoom(room));
+    }
+
+    @Test
+    public void deleteRoomSuccessfully() {
+        //given
+        Set<AbstractCommodity> commodities = new HashSet<>();
+        commodities.add(new Bed(BedType.KING_SIZE));
+        int roomID=3;
+        Room threePeopleKingSizeRoom = new Room(roomID, commodities);
+
+        //when
+        boolean result = roomService.deleteRoom(threePeopleKingSizeRoom);
+
+        //then
+        assertEquals(true, result);
     }
 }

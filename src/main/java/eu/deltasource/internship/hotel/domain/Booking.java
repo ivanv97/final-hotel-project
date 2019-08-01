@@ -1,5 +1,10 @@
 package eu.deltasource.internship.hotel.domain;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.fasterxml.jackson.datatype.jsr310.deser.LocalDateDeserializer;
+import com.fasterxml.jackson.datatype.jsr310.ser.LocalDateSerializer;
 import eu.deltasource.internship.hotel.exception.FailedInitializationException;
 
 import java.time.LocalDate;
@@ -13,7 +18,13 @@ public class Booking {
     private final int guestId;
     private final int roomId;
     private int numberOfPeople;
+    @JsonFormat(pattern = "yyyy-MM-dd")
+    @JsonSerialize(using = LocalDateSerializer.class)
+    @JsonDeserialize(using = LocalDateDeserializer.class)
     private LocalDate from;
+    @JsonFormat(pattern = "yyyy-MM-dd")
+    @JsonSerialize(using = LocalDateSerializer.class)
+    @JsonDeserialize(using = LocalDateDeserializer.class)
     private LocalDate to;
 
     public Booking(int bookingId, int guestId, int roomId, int numberOfPeople, LocalDate from, LocalDate to) {
