@@ -3,9 +3,11 @@ package eu.deltasource.internship.hotel.domain;
 import eu.deltasource.internship.hotel.domain.commodity.AbstractCommodity;
 import eu.deltasource.internship.hotel.domain.commodity.Bed;
 import eu.deltasource.internship.hotel.exception.FailedInitializationException;
+
 import lombok.Data;
 
-import java.util.Collections;
+import org.springframework.beans.factory.annotation.Autowired;
+
 import java.util.HashSet;
 import java.util.Set;
 
@@ -19,6 +21,7 @@ public class Room {
 
     private int roomId;
     private int roomCapacity;
+    @Autowired
     private final Set<AbstractCommodity> commodities;
 
     public Room(int roomId, Set<AbstractCommodity> commodities) {

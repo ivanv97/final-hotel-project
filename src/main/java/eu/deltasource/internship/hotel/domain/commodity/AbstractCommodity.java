@@ -1,8 +1,11 @@
 package eu.deltasource.internship.hotel.domain.commodity;
 
+import org.springframework.stereotype.Component;
+
 /**
  * Created by Taner Ilyazov - Delta Source Bulgaria on 2019-07-28.
  */
+@Component
 public abstract class AbstractCommodity {
 
     protected final int inventoryId;
