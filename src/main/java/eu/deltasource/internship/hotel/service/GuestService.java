@@ -13,19 +13,37 @@ import java.util.Arrays;
 import java.util.List;
 
 /**
- * Represents services for guests
+ * Service class for
+ * business logic of creating
+ * guests, searching, deleting
+ * and updating
  */
 @Service
 public class GuestService {
 
 	private final GuestRepository guestRepository;
 
+	/**
+	 * Constructor that takes
+	 * repository object which is annotated as
+	 * Autowired and the repository itself as bean (@Repository)
+	 *
+	 * @param guestRepository
+	 */
 	@Autowired
 	public GuestService(GuestRepository guestRepository) {
 		this.guestRepository = guestRepository;
 	}
 
-
+	/**
+	 * Tries to find a guest with given ID
+	 * returns the Guest object if found
+	 *
+	 * @param id id of the guest
+	 * @return Guest object if one is found
+	 * @throws ItemNotFoundException if a guest with
+	 *                               the specified ID is not found
+	 */
 	public Guest findById(int id) {
 		if (!guestRepository.existsById(id)) {
 			throw new ItemNotFoundException("User does not exist");
@@ -47,15 +65,13 @@ public class GuestService {
 	}
 
 	/**
-	 * Deletes guest
+	 * Deletes a guest
+	 * if it finds one matching
 	 *
 	 * @param guest the guest that will be removed
 	 * @return true if the guest if successfully removed
 	 */
 	public boolean deleteGuest(Guest guest) {
-		if (!guestRepository.existsById(guest.getGuestId())) {
-			throw new ItemNotFoundException("No guest with such ID!");
-		}
 		validGuest(guest);
 		return guestRepository.delete(findById(guest.getGuestId()));
 	}
@@ -64,9 +80,6 @@ public class GuestService {
 	 * Deletes all guests
 	 */
 	public void deleteAll() {
-		if (guestRepository.count() == 0) {
-			throw new ItemNotFoundException("Empty list of guests can not be deleted!");
-		}
 		guestRepository.deleteAll();
 	}
 
@@ -86,11 +99,8 @@ public class GuestService {
 		guestRepository.save(item);
 	}
 
-
 	/**
 	 * Creates list of new guests
-	 * <p>
-	 * <<<<<<< HEAD
 	 *
 	 * @param guests the list of new guests
 	 */
@@ -100,24 +110,12 @@ public class GuestService {
 	}
 
 	/**
-	 * Creates array of new guests which is converted to list
-	 *
-	 * @param guests array of guests
-	 */
-	public void saveAll(Guest... guests) {
-		saveAll(Arrays.asList(guests));
-	}
-
-	/**
 	 * Updates an existing guest
 	 *
 	 * @param guest the guest that will be updated
 	 * @return the updated guest
 	 */
 	public Guest updateGuest(Guest guest) {
-		if (!guestRepository.existsById(guest.getGuestId())) {
-			throw new ItemNotFoundException("No guest with such ID!");
-		}
 		validGuest(guest);
 		return guestRepository.updateGuest(guest);
 	}
@@ -141,7 +139,20 @@ public class GuestService {
 		if (guest.getFirstName() == null || guest.getLastName() == null || guest.getGender() == null
 			|| guest.getFirstName().isEmpty() || guest.getLastName().isEmpty()) {
 			throw new FailedInitializationException("Invalid guest fields!");
+
 		}
+	}
+
+	/**
+	 * Saves multiple guests
+	 * Takes varargs and checks each arg
+	 * separately for validity
+	 *
+	 * @param items Guest varargs
+	 */
+	public void saveAll(Guest... items) {
+		validGuests(Arrays.asList(items));
+		guestRepository.saveAll(items);
 	}
 }
 

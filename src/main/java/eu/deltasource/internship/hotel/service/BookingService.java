@@ -3,11 +3,17 @@ package eu.deltasource.internship.hotel.service;
 import eu.deltasource.internship.hotel.domain.Booking;
 import eu.deltasource.internship.hotel.exception.BookingOverlappingException;
 import eu.deltasource.internship.hotel.exception.FailedInitializationException;
+import eu.deltasource.internship.hotel.exception.ArgumentNotValidException;
 import eu.deltasource.internship.hotel.exception.ItemNotFoundException;
 import eu.deltasource.internship.hotel.repository.BookingRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
+import java.util.List;
+
+
+import java.awt.print.Book;
 import java.time.LocalDate;
 import java.util.List;
 
@@ -26,19 +32,6 @@ public class BookingService {
 		this.bookingRepository = bookingRepository;
 		this.roomService = roomService;
 		this.guestService = guestService;
-	}
-
-	/**
-	 * Searches booking by id
-	 *
-	 * @param id booking's id
-	 * @return the found booking
-	 */
-	public Booking findById(int id) {
-		if (bookingRepository.existsById(id)) {
-			return bookingRepository.findById(id);
-		}
-		throw new ItemNotFoundException("Booking with id " + id + " does not exist!");
 	}
 
 	/**
@@ -62,16 +55,6 @@ public class BookingService {
 	public boolean delete(Booking booking) {
 		validBooking(booking);
 		return bookingRepository.delete(findById(booking.getBookingId()));
-	}
-
-	/**
-	 * Deletes all bookings
-	 */
-	public void deleteAll() {
-		if (bookingRepository.count() == 0) {
-			throw new ItemNotFoundException("Empty list of bookings can not be deleted!");
-		}
-		bookingRepository.deleteAll();
 	}
 
 	/**
@@ -104,25 +87,14 @@ public class BookingService {
 	 * @return updated booking
 	 */
 	public Booking updateBookingByDates(int bookingId, LocalDate from, LocalDate to) {
-
 		validDates(from, to);
-
 		Booking booking = findById(bookingId);
 
 		if (validUpdateDatesOverlapping(from, to, booking.getRoomId(), bookingId)) {
+			booking.setBookingDates(from, to);
 			return bookingRepository.updateDates(booking);
 		}
 		throw new BookingOverlappingException("Overlapping dates!");
-	}
-
-	/**
-	 * @return list of all bookings
-	 */
-	public List<Booking> findAll() {
-		if (bookingRepository.count() == 0) {
-			throw new ItemNotFoundException("Empty list of bookings!");
-		}
-		return bookingRepository.findAll();
 	}
 
 	/**
@@ -142,7 +114,7 @@ public class BookingService {
 	 * @param bookings array of bookings
 	 */
 	public void saveAll(Booking... bookings) {
-		if (bookings == null || bookings.length == 0) {
+		if (bookings == null) {
 			throw new FailedInitializationException("Empty array of bookings");
 		}
 		for (Booking booking : bookings) {
@@ -230,6 +202,133 @@ public class BookingService {
 				}
 			}
 		}
+	}
+
+	/**
+	 * Returns a list of
+	 * all bookings for all rooms
+	 */
+	public List<Booking> findAll() {
+		return bookingRepository.findAll();
+	}
+
+	/**
+	 * Gets a booking by its ID
+	 *
+	 * @param id to be searched by
+	 * @return Booking object that matches the given id
+	 * @throws ItemNotFoundException If the Id doesn't exist in the database
+	 */
+	public Booking findById(int id) {
+		if (!bookingRepository.existsById(id)) {
+			throw new ItemNotFoundException("There are no bookings with that ID!");
+		}
+		return bookingRepository.findById(id);
+	}
+
+	/**
+	 * Saves a list of booking objects
+	 * Checks each one separately beforehand
+	 *
+	 * @param items The list we want to save
+	 * @throws ArgumentNotValidException If any of the booking
+	 *                                   objects is not valid
+	 */
+	public void saveAll(List<Booking> items) {
+		for (Booking item : items) {
+			if (!checkBookingValidity(item, false)) {
+				throw new ArgumentNotValidException("Dates are overlapping! Booking cannot be made!");
+			}
+			bookingRepository.save(item);
+		}
+	}
+
+	/**
+	 * Updates the dates of an already
+	 * existing booking
+	 *
+	 * @param item Booking with the new dates we want to set
+	 * @throws ItemNotFoundException     if booking with this Id does
+	 *                                   not exist
+	 * @throws ArgumentNotValidException if the new dates are not valid
+	 *                                   and overlapping
+	 */
+	public void updateDates(Booking item) {
+		if (!bookingRepository.existsById(item.getBookingId())) {
+			throw new ItemNotFoundException("No such booking exists!");
+		}
+		if (!checkBookingValidity(item, true)) {
+			throw new ArgumentNotValidException("Dates are overlapping! Booking cannot be made!");
+		}
+		bookingRepository.save(item);
+	}
+
+	/**
+	 * Deletes every single booking
+	 * from the repo
+	 */
+	public void deleteAll() {
+		bookingRepository.deleteAll();
+	}
+
+	/**
+	 * Checks if the passed booking
+	 * is valid - it has to be not null,
+	 * the room for which it is being made
+	 * should already exist, the guest which makes it should already
+	 * exists and the dates should not overlap with any previous bookings
+	 *
+	 * @param bookingToCheck the booking on which to perform the check
+	 * @return true if everything is fine, false otherwise
+	 * @throws ArgumentNotValidException if the booking we try to check is null
+	 */
+	public boolean checkBookingValidity(Booking bookingToCheck, boolean update) {
+		if (bookingToCheck == null) {
+			throw new ArgumentNotValidException("Booking cannot be null!");
+		}
+		roomService.getRoomById(bookingToCheck.getRoomId());
+		guestService.findById(bookingToCheck.getGuestId());
+		return checkDatesOverlapping(bookingToCheck, update);
+	}
+
+	/**
+	 * Checks if the from and to dates of a booking
+	 * are valid - they should not overlap with any previous
+	 * bookings made and if the booking already exists and we just try to
+	 * update it we should ignore the current dates of the booking
+	 *
+	 * @param bookingToCheck perform check on this booking
+	 * @return true if no bookings made previously,
+	 * false if no dates available, true if there are bookings but
+	 * there is no conflict in dates
+	 */
+	public boolean checkDatesOverlapping(Booking bookingToCheck, boolean update) {
+		if (findAll().isEmpty()) {
+			return true;
+		}
+		if (roomService.getRoomById(bookingToCheck.getRoomId()).getRoomCapacity()
+			!= bookingToCheck.getNumberOfPeople()) {
+			throw new ArgumentNotValidException("The room does not have desired capacity");
+		}
+		for (Booking booking : findAll()) {
+			if (booking.getRoomId() == bookingToCheck.getRoomId()) {
+				if (bookingToCheck.getBookingId() == booking.getBookingId() && update) {
+					deleteById(bookingToCheck.getBookingId());
+					if (checkDatesOverlapping(bookingToCheck, false)) {
+						return true;
+					} else {
+						save(booking);
+						return false;
+					}
+				}
+				if (!bookingToCheck.getFrom().isBefore(booking.getTo())
+					|| !bookingToCheck.getTo().isAfter(booking.getFrom())) {
+					continue;
+				}
+				return false;
+			}
+		}
+		return true;
 	}
 }
 

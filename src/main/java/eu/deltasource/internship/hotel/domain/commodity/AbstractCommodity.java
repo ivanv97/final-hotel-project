@@ -1,5 +1,6 @@
 package eu.deltasource.internship.hotel.domain.commodity;
 
+import lombok.Getter;
 import org.springframework.stereotype.Component;
 
 /**
@@ -8,16 +9,13 @@ import org.springframework.stereotype.Component;
 @Component
 public abstract class AbstractCommodity {
 
+	@Getter
     protected final int inventoryId;
 
     private static int INVENTORY_COUNT;
 
     public AbstractCommodity() {
         this.inventoryId = ++INVENTORY_COUNT;
-    }
-
-    public int getInventoryId() {
-        return inventoryId;
     }
 
     public abstract void prepare();

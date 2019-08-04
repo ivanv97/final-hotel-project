@@ -8,6 +8,8 @@ import eu.deltasource.internship.hotel.repository.RoomRepository;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.BeforeEach;
+import eu.deltasource.internship.hotel.domain.commodity.Bed;
+import eu.deltasource.internship.hotel.domain.commodity.BedType;
 
 import java.util.Arrays;
 import java.util.HashSet;
@@ -19,292 +21,276 @@ import static org.junit.jupiter.api.Assertions.*;
 
 public class RoomServiceTest {
 
-    private RoomRepository roomRepository;
-    private RoomService roomService;
-    private Room singleRoom;
-    private Room kingSizeRoom;
+	private RoomRepository roomRepository;
+	private RoomService roomService;
+	private Room singleRoom;
+	private Room kingSizeRoom;
 
-    @BeforeEach
-    public void setUp() {
-        roomRepository = new RoomRepository();
-        roomService = new RoomService(roomRepository);
-    }
+	@BeforeEach
+	public void setUp() {
+		roomRepository = new RoomRepository();
+		roomService = new RoomService(roomRepository);
+	}
 
-    @Test
-    public void getRoomByExistingId() {
-        //given
-        int roomId = 1;
-        Set<AbstractCommodity> singleSet = new HashSet<>
-                (Arrays.asList(new Bed(SINGLE), new Toilet(), new Shower()));
-        singleRoom = new Room(roomId, singleSet);
-        roomService.saveRoom(singleRoom);
+	@Test
+	public void getRoomByExistingId() {
+		//given
+		int roomId = 1;
+		Set<AbstractCommodity> singleSet = new HashSet<>
+			(Arrays.asList(new Bed(SINGLE), new Toilet(), new Shower()));
+		singleRoom = new Room(roomId, singleSet);
+		roomService.saveRoom(singleRoom);
 
-        //when
-        Room searchedRoom = roomService.getRoomById(roomId);
+		//when
+		Room searchedRoom = roomService.getRoomById(roomId);
 
-        //then
-        assertTrue(searchedRoom.equals(singleRoom));
-    }
+		//then
+		assertEquals(singleRoom, searchedRoom);
+	}
 
-    @Test
-    public void getRoomByIdThatDoesNotExist() {
-        //given
-        int roomId = 7;
+	@Test
+	public void getRoomByIdThatDoesNotExist() {
+		//given
+		int roomId = 7;
 
-        //when and then
-        assertThrows(ItemNotFoundException.class, () -> roomService.getRoomById(roomId));
-    }
+		//when and then
+		assertThrows(ItemNotFoundException.class, () -> roomService.getRoomById(roomId));
+	}
 
-    @Test
-    public void getAllExistingRooms() {
-        //given
-        // 2 rooms already exist
-        Set<AbstractCommodity> singleSet = new HashSet<>
-                (Arrays.asList(new Bed(SINGLE), new Toilet(), new Shower()));
+	@Test
+	public void getAllExistingRooms() {
+		//given
+		// 2 rooms already exist
+		Set<AbstractCommodity> singleSet = new HashSet<>
+			(Arrays.asList(new Bed(SINGLE), new Toilet(), new Shower()));
 
-        Set<AbstractCommodity> kingSizeSet = new HashSet<>
-                (Arrays.asList(new Bed(BedType.KING_SIZE), new Toilet(), new Shower()));
+		Set<AbstractCommodity> kingSizeSet = new HashSet<>
+			(Arrays.asList(new Bed(BedType.KING_SIZE), new Toilet(), new Shower()));
 
-        singleRoom = new Room(1, singleSet);
-        kingSizeRoom = new Room(2, kingSizeSet);
+		singleRoom = new Room(1, singleSet);
+		kingSizeRoom = new Room(2, kingSizeSet);
 
-        roomService.saveRooms(singleRoom, kingSizeRoom);
-        int numberOfRooms = 2;
+		roomService.saveRooms(singleRoom, kingSizeRoom);
+		int numberOfRooms = 2;
 
-        //when
-        List<Room> rooms = roomService.findRooms();
+		//when
+		List<Room> rooms = roomService.findRooms();
 
-        //then
-        assertEquals(numberOfRooms, rooms.size());
-        assertTrue(rooms.contains(singleRoom));
-        assertTrue(rooms.contains(kingSizeRoom));
-    }
+		//then
+		assertEquals(numberOfRooms, rooms.size());
+		assertTrue(rooms.contains(singleRoom));
+		assertTrue(rooms.contains(kingSizeRoom));
+	}
 
-    @Test
-    public void getAllRoomsThatDoNotExist() {
-        //given
+	@Test
+	public void createRoomSuccessfully() {
+		//given
+		Set<AbstractCommodity> commodities = new HashSet<>(Arrays.asList(new Bed(DOUBLE)));
+		int roomId = 1;
+		Room doubleBed = new Room(roomId, commodities);
 
-        // when and then
-        assertThrows(ItemNotFoundException.class, () -> roomService.findRooms());
-    }
+		//when
+		roomService.saveRoom(doubleBed);
 
-    @Test
-    public void createRoomSuccessfully() {
-        //given
-        Set<AbstractCommodity> commodities = new HashSet<>(Arrays.asList(new Bed(DOUBLE)));
-        int roomId = 1;
-        Room doubleBed = new Room(roomId, commodities);
+		//then
+		assertTrue(roomService.findRooms().contains((doubleBed)));
+	}
 
-        //when
-        roomService.saveRoom(doubleBed);
+	@Test
+	public void createRoomUnsuccessfully() {
+		//given
+		Set<AbstractCommodity> invalidSet = null;
+		Set<AbstractCommodity> doubleSet = new HashSet<>();
+		int roomId = 3;
+		Room kingSizeRoom = null;
 
-        //then
-        assertTrue(roomService.findRooms().contains((doubleBed)));
-    }
+		//when and then
+		assertThrows(FailedInitializationException.class,
+			() -> roomService.saveRoom(new Room(roomId, doubleSet)));
+		assertThrows(FailedInitializationException.class,
+			() -> roomService.saveRoom((kingSizeRoom)));
+		assertThrows(FailedInitializationException.class,
+			() -> roomService.saveRoom(new Room(roomId, invalidSet)));
+	}
 
-    @Test
-    public void createRoomUnsuccessfully() {
-        //given
-        Set<AbstractCommodity> invalidSet = null;
-        Set<AbstractCommodity> doubleSet = new HashSet<>();
-        int roomId = 3;
-        Room kingSizeRoom = null;
+	@Test
+	public void deleteRoomByExistingId() {
+		// given
+		Set<AbstractCommodity> singleSet = new HashSet<>
+			(Arrays.asList(new Bed(SINGLE), new Toilet(), new Shower()));
 
-        //when and then
-        assertThrows(FailedInitializationException.class,
-                () -> roomService.saveRoom(new Room(roomId, doubleSet)));
-        assertThrows(FailedInitializationException.class,
-                () -> roomService.saveRoom((kingSizeRoom)));
-        assertThrows(FailedInitializationException.class,
-                () -> roomService.saveRoom(new Room(roomId, invalidSet)));
-    }
+		Set<AbstractCommodity> kingSizeSet = new HashSet<>
+			(Arrays.asList(new Bed(BedType.KING_SIZE), new Bed(DOUBLE), new Toilet(), new Shower()));
 
-    @Test
-    public void deleteRoomByExistingId() {
-        // given
-        Set<AbstractCommodity> singleSet = new HashSet<>
-                (Arrays.asList(new Bed(SINGLE), new Toilet(), new Shower()));
+		singleRoom = new Room(1, singleSet);
+		kingSizeRoom = new Room(2, kingSizeSet);
 
-        Set<AbstractCommodity> kingSizeSet = new HashSet<>
-                (Arrays.asList(new Bed(BedType.KING_SIZE), new Bed(DOUBLE), new Toilet(), new Shower()));
+		roomService.saveRooms(singleRoom, kingSizeRoom);
+		int roomId = 2;
 
-        singleRoom = new Room(1, singleSet);
-        kingSizeRoom = new Room(2, kingSizeSet);
+		// when
+		boolean result = roomService.deleteRoomById(roomId);
 
-        roomService.saveRooms(singleRoom, kingSizeRoom);
-        int roomId = 2;
+		//then
+		assertTrue(result);
+		assertThrows(ItemNotFoundException.class, () -> roomService.getRoomById(roomId));
+	}
 
-        // when
-        boolean result = roomService.deleteRoomById(roomId);
+	@Test
+	public void deleteRoomByIdThatDoesNotExist() {
+		//given
+		int roomId = 12;
 
-        //then
-        assertEquals(true, result);
-        assertThrows(ItemNotFoundException.class, () -> roomService.getRoomById(roomId));
-    }
+		//when and then
+		assertThrows(ItemNotFoundException.class, () -> roomService.deleteRoomById(roomId));
+	}
 
-    @Test
-    public void deleteRoomByIdThatDoesNotExist() {
-        //given
-        int roomId = 12;
+	@Test
+	public void deleteRoomNullCheck() {
+		// given
+		Room room = null;
 
-        //when and then
-        assertThrows(ItemNotFoundException.class, () -> roomService.deleteRoomById(roomId));
-    }
+		//when and then
+		assertThrows(FailedInitializationException.class, () -> roomService.deleteRoom(room));
+	}
 
-    @Test
-    public void deleteRoomNullCheck() {
-        // given
-        Room room = null;
+	@Test
+	public void deleteExistingRoom() {
+		//given
+		Set<AbstractCommodity> kingSizeSet = new HashSet<>
+			(Arrays.asList(new Bed(BedType.KING_SIZE), new Toilet(), new Shower()));
 
-        //when and then
-        assertThrows(FailedInitializationException.class, () -> roomService.deleteRoom(room));
-    }
-
-    @Test
-    public void deleteExistingRoom() {
-        //given
-        Set<AbstractCommodity> kingSizeSet = new HashSet<>
-                (Arrays.asList(new Bed(BedType.KING_SIZE), new Toilet(), new Shower()));
-
-        Set<AbstractCommodity> threePeopleKingSizeSet = new HashSet<>
-                (Arrays.asList(new Bed(BedType.KING_SIZE), new Bed(SINGLE), new Toilet(), new Shower()));
+		Set<AbstractCommodity> threePeopleKingSizeSet = new HashSet<>
+			(Arrays.asList(new Bed(BedType.KING_SIZE), new Bed(SINGLE), new Toilet(), new Shower()));
 
 
-        kingSizeRoom = new Room(1, threePeopleKingSizeSet);
-        singleRoom = new Room(2, kingSizeSet);
+		kingSizeRoom = new Room(1, threePeopleKingSizeSet);
+		singleRoom = new Room(2, kingSizeSet);
 
-        roomService.saveRooms(kingSizeRoom, singleRoom);
+		roomService.saveRooms(kingSizeRoom, singleRoom);
 
-        int roomId = 1;
-        boolean expectedResult = true;
+		int roomId = 1;
 
-        //when
-        boolean actualResult = roomService.deleteRoom(kingSizeRoom);
+		//when
+		boolean actualResult = roomService.deleteRoom(kingSizeRoom);
 
-        //then
-        assertEquals(expectedResult, actualResult);
-        assertThrows(ItemNotFoundException.class, () -> roomService.getRoomById(roomId));
-    }
+		//then
+		assertTrue(actualResult);
+		assertThrows(ItemNotFoundException.class, () -> roomService.getRoomById(roomId));
+	}
 
-    @Test
-    public void deleteAllExistingRooms() {
-        //given
-        Set<AbstractCommodity> kingSizeSet = new HashSet<>
-                (Arrays.asList(new Bed(BedType.KING_SIZE), new Toilet(), new Shower()));
+	@Test
+	public void deleteAllExistingRooms() {
+		//given
+		Set<AbstractCommodity> kingSizeSet = new HashSet<>
+			(Arrays.asList(new Bed(BedType.KING_SIZE), new Toilet(), new Shower()));
 
-        Set<AbstractCommodity> threePeopleKingSizeSet = new HashSet<>
-                (Arrays.asList(new Bed(BedType.KING_SIZE), new Bed(SINGLE), new Toilet(), new Shower()));
+		Set<AbstractCommodity> threePeopleKingSizeSet = new HashSet<>
+			(Arrays.asList(new Bed(BedType.KING_SIZE), new Bed(SINGLE), new Toilet(), new Shower()));
 
-        singleRoom = new Room(1, kingSizeSet);
-        kingSizeRoom = new Room(2, threePeopleKingSizeSet);
+		singleRoom = new Room(1, kingSizeSet);
+		kingSizeRoom = new Room(2, threePeopleKingSizeSet);
 
-        roomService.saveRooms(singleRoom, kingSizeRoom);
+		roomService.saveRooms(singleRoom, kingSizeRoom);
 
-        // when
-        roomService.deleteAll();
+		// when
+		roomService.deleteAll();
+		List<Room> allRooms = roomService.findRooms();
 
-        //then
-        assertThrows(ItemNotFoundException.class, () -> roomService.findRooms());
-    }
+		//then
+		assertTrue(allRooms.isEmpty());
+	}
 
-    @Test
-    public void deleteAllRoomsThatDoNotExist() {
-        //given
+	@Test
+	public void updateRoomSuccessfully() {
+		// given
+		Set<AbstractCommodity> kingSizeSet = new HashSet<>
+			(Arrays.asList(new Bed(BedType.KING_SIZE), new Toilet(), new Shower()));
 
-        //when and then
-        assertThrows(ItemNotFoundException.class, () -> roomService.deleteAll());
-    }
+		Set<AbstractCommodity> threePeopleKingSizeSet = new HashSet<>
+			(Arrays.asList(new Bed(BedType.KING_SIZE), new Bed(SINGLE), new Toilet(), new Shower()));
 
-    @Test
-    public void updateRoomSuccessfully() {
-        // given
-        Set<AbstractCommodity> kingSizeSet = new HashSet<>
-                (Arrays.asList(new Bed(BedType.KING_SIZE), new Toilet(), new Shower()));
+		singleRoom = new Room(1, kingSizeSet);
+		kingSizeRoom = new Room(2, threePeopleKingSizeSet);
 
-        Set<AbstractCommodity> threePeopleKingSizeSet = new HashSet<>
-                (Arrays.asList(new Bed(BedType.KING_SIZE), new Bed(SINGLE), new Toilet(), new Shower()));
+		roomService.saveRooms(singleRoom, kingSizeRoom);
 
-        singleRoom = new Room(1, kingSizeSet);
-        kingSizeRoom = new Room(2, threePeopleKingSizeSet);
+		Set<AbstractCommodity> updatedCommodities = new HashSet<>(Arrays.asList(new Bed(KING_SIZE), new Toilet()));
+		int roomId = 2;
+		Room updatedRoom = new Room(roomId, updatedCommodities);
 
-        roomService.saveRooms(singleRoom, kingSizeRoom);
+		// when
+		Room expectedRoom = roomService.updateRoom(updatedRoom);
 
-        Set<AbstractCommodity> updatedCommodities = new HashSet<>(Arrays.asList(new Bed(KING_SIZE), new Toilet()));
-        int roomId = 2;
-        Room updatedRoom = new Room(roomId, updatedCommodities);
+		//then
+		assertTrue(roomService.getRoomById(roomId).getCommodities().equals(expectedRoom.getCommodities()));
+	}
 
-        // when
-        Room expectedRoom = roomService.updateRoom(updatedRoom);
+	@Test
+	public void updateRoomUnsuccessfully() {
+		// given
+		Set<AbstractCommodity> threePeopleKingSizeSet = new HashSet<>
+			(Arrays.asList(new Bed(BedType.KING_SIZE), new Bed(SINGLE), new Toilet(), new Shower()));
 
-        //then
-        assertTrue(roomService.getRoomById(roomId).getCommodities().equals(expectedRoom.getCommodities()));
-    }
+		roomService.saveRoom(new Room(1, threePeopleKingSizeSet));
 
-    @Test
-    public void updateRoomUnsuccessfully() {
-        // given
-        Set<AbstractCommodity> threePeopleKingSizeSet = new HashSet<>
-                (Arrays.asList(new Bed(BedType.KING_SIZE), new Bed(SINGLE), new Toilet(), new Shower()));
+		Set<AbstractCommodity> updatedCommodities = new HashSet<>(Arrays.asList(new Bed(DOUBLE), new Shower()));
+		Set<AbstractCommodity> updatedCommoditiesNull = new HashSet<>(Arrays.asList(new Bed(DOUBLE), null));
+		int roomId = 8;
+		Room updatedRoom = new Room(roomId, updatedCommodities);
+		Room updatedRoomHasNullCommodity = new Room(1, updatedCommoditiesNull);
+		Room newRoom = null;
 
-        roomService.saveRoom(new Room(1, threePeopleKingSizeSet));
+		// when and then
+		//invalid room id
+		assertThrows(ItemNotFoundException.class, () -> roomService.updateRoom(updatedRoom));
+		// room is null
+		assertThrows(FailedInitializationException.class, () -> roomService.updateRoom(newRoom));
+		// room with null commodity
+		assertThrows(FailedInitializationException.class, () -> roomService.updateRoom(updatedRoomHasNullCommodity));
+	}
 
-        Set<AbstractCommodity> updatedCommodities = new HashSet<>(Arrays.asList(new Bed(DOUBLE), new Shower()));
-        Set<AbstractCommodity> updatedCommoditiesNull = new HashSet<>(Arrays.asList(new Bed(DOUBLE), null));
-        int roomId = 8;
-        Room updatedRoom = new Room(roomId, updatedCommodities);
-        Room updatedRoomHasNullCommodity = new Room(1, updatedCommoditiesNull);
-        Room newRoom = null;
+	@Test
+	public void savedRoomsUnsuccessfully() {
+		//given
+		Room[] rooms = null;
+		Set<AbstractCommodity> commodities = new HashSet<>(Arrays.asList(new Bed(KING_SIZE), new Shower()));
+		int roomId = 3;
+		Room kingSizeRoom = new Room(roomId, commodities);
+		Room invalidRoom = null;
 
-        // when and then
-        //invalid room id
-        assertThrows(ItemNotFoundException.class, () -> roomService.updateRoom(updatedRoom));
-        // room is null
-        assertThrows(FailedInitializationException.class, () -> roomService.updateRoom(newRoom));
-        // room with null commodity
-        assertThrows(FailedInitializationException.class, () -> roomService.updateRoom(updatedRoomHasNullCommodity));
-    }
+		// when and then
+		//rooms reference is null
+		assertThrows(FailedInitializationException.class, () -> roomService.saveRooms(rooms));
+		//room is null
+		assertThrows(FailedInitializationException.class, () -> roomService.saveRooms(kingSizeRoom, invalidRoom));
+	}
 
-    @Test
-    public void savedRoomsUnsuccessfully() {
-        //given
-        Room[] rooms = null;
-        Set<AbstractCommodity> commodities = new HashSet<>(Arrays.asList(new Bed(KING_SIZE), new Shower()));
-        int roomId = 3;
-        Room kingSizeRoom = new Room(roomId, commodities);
-        Room invalidRoom = null;
+	@Test
+	public void saveRoomsSuccessfully() {
+		//given
+		Set<AbstractCommodity> firstRoomCommodities = new HashSet<>
+			(Arrays.asList(new Bed(DOUBLE), new Toilet()));
+		Set<AbstractCommodity> secondRoomCommodities = new HashSet<>
+			(Arrays.asList(new Bed(SINGLE), new Bed(KING_SIZE)));
+		int roomID = 1, roomId = 2, expectedSize = 2;
+		Room kingSizeRoom = new Room(roomID, firstRoomCommodities);
+		Room singleKingSizeRoom = new Room(roomId, secondRoomCommodities);
 
-        // when and then
-        //rooms reference is null
-        assertThrows(FailedInitializationException.class, () -> roomService.saveRooms(rooms));
-        //room is null
-        assertThrows(FailedInitializationException.class, () -> roomService.saveRooms(kingSizeRoom, invalidRoom));
-    }
+		//when
+		roomService.saveRooms(kingSizeRoom, singleKingSizeRoom);
 
-    @Test
-    public void saveRoomsSuccessfully() {
-        //given
-        Set<AbstractCommodity> firstRoomCommodities = new HashSet<>
-                (Arrays.asList(new Bed(DOUBLE), new Toilet()));
-        Set<AbstractCommodity> secondRoomCommodities = new HashSet<>
-                (Arrays.asList(new Bed(SINGLE), new Bed(KING_SIZE)));
-        int roomID = 1, roomId = 2, expectedSize = 2;
-        Room kingSizeRoom = new Room(roomID, firstRoomCommodities);
-        Room singleKingSizeRoom = new Room(roomId, secondRoomCommodities);
+		//then
+		assertEquals(expectedSize, roomService.findRooms().size());
+		assertTrue(roomService.findRooms().contains(kingSizeRoom));
+		assertTrue(roomService.findRooms().contains(singleKingSizeRoom));
+	}
 
-        //when
-        roomService.saveRooms(kingSizeRoom, singleKingSizeRoom);
-
-        //then
-        assertEquals(expectedSize, roomService.findRooms().size());
-        assertTrue(roomService.findRooms().contains(kingSizeRoom));
-        assertTrue(roomService.findRooms().contains(singleKingSizeRoom));
-    }
-
-    @AfterEach
-    public void tearDown() {
-        roomRepository = null;
-        roomService = null;
-        singleRoom = null;
-        kingSizeRoom = null;
-    }
+	@AfterEach
+	public void tearDown() {
+		roomRepository = null;
+		roomService = null;
+		singleRoom = null;
+		kingSizeRoom = null;
+	}
 }

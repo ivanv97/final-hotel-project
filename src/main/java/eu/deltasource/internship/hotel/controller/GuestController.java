@@ -17,26 +17,26 @@ public class GuestController {
 
 	@GetMapping(value = "/{id}")
 	public Guest findById(@PathVariable("id") int id) {
-		return this.guestService.findById(id);
+		return guestService.findById(id);
 	}
 
 	@GetMapping
 	public List<Guest> findAll() {
-		return this.guestService.findAll();
+		return guestService.findAll();
 	}
 
 	@PutMapping(produces = MediaType.APPLICATION_JSON_VALUE, consumes = MediaType.APPLICATION_JSON_VALUE)
 	public Guest updateGuest(@RequestBody Guest guest) {
-		return this.guestService.updateGuest(guest);
+		return guestService.updateGuest(guest);
 	}
 
 	@DeleteMapping(value = "/{id}")
 	public boolean deleteById(@PathVariable("id") int id) {
-		return this.guestService.deleteById(id);
+		return guestService.deleteById(id);
 	}
 
 	@PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE)
 	public void saveAll(@RequestBody List<Guest> items) {
-		this.guestService.saveAll(items);
+		guestService.saveAll(items);
 	}
 }
