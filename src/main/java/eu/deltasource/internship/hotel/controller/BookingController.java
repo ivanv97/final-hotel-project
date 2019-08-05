@@ -38,6 +38,6 @@ public class BookingController {
 
     @PutMapping(value = "/{ID}")
     public void updateBooking(@PathVariable("ID") int bookingID, @RequestBody Date dates) {
-        bookingService.updateBooking(bookingID, dates.getFrom(), dates.getTo());
+        bookingService.updateBookingByDates(bookingID, dates.getFrom(), dates.getTo());
     }
 }

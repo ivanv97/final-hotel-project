@@ -1,10 +1,13 @@
 package eu.deltasource.internship.hotel.domain;
 
 import eu.deltasource.internship.hotel.exception.FailedInitializationException;
+import lombok.Data;
+
 
 /**
- * Created by Taner Ilyazov - Delta Source Bulgaria on 2019-07-28.
+ * Represents information for a hotel guest
  */
+@Data
 public class Guest {
 
     private final int guestId;
@@ -37,22 +40,6 @@ public class Guest {
         }
         this.firstName = firstName;
         this.lastName = lastName;
-    }
-
-    public int getGuestId() {
-        return guestId;
-    }
-
-    public Gender getGender() {
-        return gender;
-    }
-
-    public String getFirstName() {
-        return firstName;
-    }
-
-    public String getLastName() {
-        return lastName;
     }
 
     @Override

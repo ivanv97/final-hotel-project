@@ -1,7 +1,7 @@
 package eu.deltasource.internship.hotel.domain.commodity;
 
 /**
- * Created by Taner Ilyazov - Delta Source Bulgaria on 2019-07-28.
+ * Represents a toilet in a hotel room
  */
 public class Toilet extends AbstractCommodity {
 

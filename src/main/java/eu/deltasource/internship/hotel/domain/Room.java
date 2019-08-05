@@ -3,13 +3,15 @@ package eu.deltasource.internship.hotel.domain;
 import eu.deltasource.internship.hotel.domain.commodity.AbstractCommodity;
 import eu.deltasource.internship.hotel.domain.commodity.Bed;
 import eu.deltasource.internship.hotel.exception.FailedInitializationException;
+import lombok.Data;
 
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
+@Data
 /**
- * Created by Taner Ilyazov - Delta Source Bulgaria on 2019-07-28.
+ * Represents a hotel room
  */
 public class Room {
 
@@ -27,18 +29,6 @@ public class Room {
 
     public Room(Room room) {
         this(room.roomId, room.getCommodities());
-    }
-
-    public int getRoomId() {
-        return roomId;
-    }
-
-    public int getRoomCapacity() {
-        return roomCapacity;
-    }
-
-    public Set<AbstractCommodity> getCommodities() {
-        return Collections.unmodifiableSet(commodities);
     }
 
     private void roomCapacitySetter() {

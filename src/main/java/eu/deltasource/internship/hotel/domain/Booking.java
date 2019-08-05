@@ -6,25 +6,21 @@ import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.fasterxml.jackson.datatype.jsr310.deser.LocalDateDeserializer;
 import com.fasterxml.jackson.datatype.jsr310.ser.LocalDateSerializer;
 import eu.deltasource.internship.hotel.exception.FailedInitializationException;
+import lombok.Data;
 
 import java.time.LocalDate;
 
 /**
- * Represents a booking
+ * Represents booking for a hotel room
  */
+@Data
 public class Booking {
 
     private final int bookingId;
     private final int guestId;
     private final int roomId;
     private int numberOfPeople;
-    @JsonFormat(pattern = "yyyy-MM-dd")
-    @JsonSerialize(using = LocalDateSerializer.class)
-    @JsonDeserialize(using = LocalDateDeserializer.class)
     private LocalDate from;
-    @JsonFormat(pattern = "yyyy-MM-dd")
-    @JsonSerialize(using = LocalDateSerializer.class)
-    @JsonDeserialize(using = LocalDateDeserializer.class)
     private LocalDate to;
 
     public Booking(int bookingId, int guestId, int roomId, int numberOfPeople, LocalDate from, LocalDate to) {
@@ -57,30 +53,6 @@ public class Booking {
         } catch (NullPointerException npe) {
             throw new FailedInitializationException("Date parameters are null!");
         }
-    }
-
-    public int getBookingId() {
-        return bookingId;
-    }
-
-    public int getGuestId() {
-        return guestId;
-    }
-
-    public int getRoomId() {
-        return roomId;
-    }
-
-    public int getNumberOfPeople() {
-        return numberOfPeople;
-    }
-
-    public LocalDate getFrom() {
-        return from;
-    }
-
-    public LocalDate getTo() {
-        return to;
     }
 
     @Override

@@ -1,6 +1,8 @@
 package eu.deltasource.internship.hotel.service;
 
 import eu.deltasource.internship.hotel.domain.Booking;
+import eu.deltasource.internship.hotel.domain.Gender;
+import eu.deltasource.internship.hotel.domain.Guest;
 import eu.deltasource.internship.hotel.domain.Room;
 import eu.deltasource.internship.hotel.domain.commodity.*;
 import eu.deltasource.internship.hotel.exception.BookingOverlappingException;
@@ -9,18 +11,16 @@ import eu.deltasource.internship.hotel.exception.ItemNotFoundException;
 import eu.deltasource.internship.hotel.repository.BookingRepository;
 import eu.deltasource.internship.hotel.repository.GuestRepository;
 import eu.deltasource.internship.hotel.repository.RoomRepository;
-
-import static org.junit.jupiter.api.Assertions.*;
-
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import java.time.LocalDate;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
 
-import static eu.deltasource.internship.hotel.domain.commodity.BedType.*;
+import static eu.deltasource.internship.hotel.domain.commodity.BedType.SINGLE;
+import static org.junit.jupiter.api.Assertions.*;
 
 public class BookingServiceTest {
 
@@ -30,9 +30,17 @@ public class BookingServiceTest {
     RoomService roomService = new RoomService(roomRepository);
     GuestService guestService = new GuestService(guestRepository);
     BookingService bookingService = new BookingService(bookingRepository, roomService, guestService);
+    Booking firstBooking;
+    Booking secondBooking;
 
-    @Before
-    public void setUp() {
+    @BeforeEach
+    void setUp() {
+
+        // guests
+        Guest firstGuest = new Guest(1, "John", "Miller", Gender.MALE);
+        Guest secondGuest = new Guest(2, "Maria", "Tam", Gender.FEMALE);
+        guestService.saveAll(firstGuest, secondGuest);
+
         // Commodities for a double room
         Set<AbstractCommodity> doubleSet = new HashSet<>(Arrays.asList
                 (new Bed(BedType.DOUBLE), new Toilet(), new Shower()));
@@ -53,52 +61,47 @@ public class BookingServiceTest {
         // adds the rooms to the repository which then can be accessed from  RoomService
         roomService.saveRooms(doubleRoom, singleRoom, kingSizeRoom);
 
-        /*
         LocalDate firstFrom = LocalDate.of(2019, 8, 15);
         LocalDate firstTo = LocalDate.of(2019, 8, 18);
-        Booking firstBooking = new Booking(1, 101, 1,
-                3, firstFrom, firstTo);
+        firstBooking = new Booking(1, 1, 1,
+                2, firstFrom, firstTo);
 
         LocalDate secondFrom = LocalDate.of(2019, 9, 18);
         LocalDate secondTo = LocalDate.of(2019, 9, 21);
-        Booking secondBooking = new Booking(12, 345, 4,
-                3, secondFrom, secondTo);
+        secondBooking = new Booking(2, 2, 2,
+                1, secondFrom, secondTo);
 
         // adds the bookings to the repository which then can be accessed from BookingService
         bookingService.saveAll(firstBooking, secondBooking);
-
-         */
     }
 
     @Test
-    public void findByID() {
+    public void findBookingByExistingId() {
         //given
-        LocalDate thirdFrom = LocalDate.of(2019, 9, 4);
-        LocalDate thirdTo = LocalDate.of(2019, 9, 7);
-        Booking thirdBooking = new Booking(3, 465, 4,
-                3, thirdFrom, thirdTo);
-        bookingService.save(thirdBooking);
-        int bookingID = 3;
+        // two bookings already exist
+        int bookingId = 1;
 
         //when
-        Booking booking = bookingService.findById(bookingID);
+        Booking booking = bookingService.findById(bookingId);
 
         // then
-        assertTrue(bookingID == booking.getBookingId());
+        assertTrue(bookingService.findById(bookingId).equals(booking));
     }
 
     @Test
-    public void notFoundID() {
-        // given
-        int bookID = -5;
+    public void findBookingByIdThatDoesNotExist() {
+        //given
+        // two bookings already exist
+        int bookingId = -5;
 
         //when and then
-        assertThrows(ItemNotFoundException.class, () -> bookingService.findById(bookID));
+        assertThrows(ItemNotFoundException.class, () -> bookingService.findById(bookingId));
     }
 
     @Test
-    public void deleteByExistingID() {
+    public void deleteByExistingId() {
         //given
+        // two bookings already exist
         int bookingID = 2;
 
         //when
@@ -106,11 +109,13 @@ public class BookingServiceTest {
 
         // then
         assertEquals(true, result);
+        assertThrows(ItemNotFoundException.class, () -> bookingService.findById(bookingID));
     }
 
     @Test
-    public void deleteByIDThatDoesNotExists() {
+    public void deleteByIDThatDoesNotExist() {
         //given
+        // two bookings already exist
         int bookingID = 56;
 
         //when and then
@@ -118,132 +123,258 @@ public class BookingServiceTest {
     }
 
     @Test
-    public void updateDatesSuccessfully() {
-        // given
-        int bookingID = 1;
-        LocalDate fromDate = LocalDate.of(2019, 8, 7);
-        LocalDate toDate = LocalDate.of(2019, 8, 12);
+    public void deleteExistingBooking() {
+        //given
+        // two bookings already exist
+        int bookingId = firstBooking.getBookingId();
+        int size = 1;
 
-        // when and then
-        assertDoesNotThrow(() -> bookingService.updateBooking(bookingID, fromDate, toDate));
-    }
+        //when
+        boolean result = bookingService.delete(firstBooking);
 
-
-    @Test
-    public void updateDatesTest() {
-        // given
-    /*    int bookingID = 1;
-        LocalDate secondFrom = LocalDate.of(2019, 9, 1);
-        LocalDate secondTo = LocalDate.of(2019, 9, 5);
-        Booking secondBooking = new Booking(bookingID, 345, 4,
-                3, secondFrom, secondTo);
-        bookingService.save(secondBooking);
-
-        LocalDate from = LocalDate.of(2019, 9, 2);
-        LocalDate to = LocalDate.of(2019, 9, 4);
-
-        // when and then 1 /Efrem/
-
-        assertThrows(BookingOverlappingException.class,
-                () -> bookingService.updateBooking(bookingID, from, to));
-*/
-        int bookingID = 1;
-        LocalDate secondFrom = LocalDate.of(2019, 9, 11);
-        LocalDate secondTo = LocalDate.of(2019, 9, 15);
-        Booking secondBooking = new Booking(bookingID, 345, 4,
-                3, secondFrom, secondTo);
-        bookingService.save(secondBooking);
-
-        LocalDate from = LocalDate.of(2019, 9, 1);
-        LocalDate to = LocalDate.of(2019, 9, 5);
-
-        // when /Taner/
-        Booking booking = bookingService.updateBooking(bookingID, from, to);
-
-        // then /Taner/
-        assertTrue(booking.equals(secondBooking));
+        assertEquals(true, result);
+        assertThrows(ItemNotFoundException.class, () -> bookingService.findById(bookingId));
+        assertTrue(size == bookingService.findAll().size());
     }
 
     @Test
-    public void updateDatesUnsuccessfullyOverlapping() {
+    public void deleteBookingThatDoesNotExist() {
+        //given
+        // two bookings already exist
+        int guestId = 1, bookingId = 3, roomId = 1, numberOfPeople = 1;
+        LocalDate thirdFrom = LocalDate.of(2019, 8, 22);
+        LocalDate thirdTo = LocalDate.of(2019, 8, 26);
+        Booking thirdBooking = new Booking(bookingId, guestId,
+                roomId, numberOfPeople, thirdFrom, thirdTo);
+
+        //when and then
+        assertThrows(ItemNotFoundException.class, () -> bookingService.delete(thirdBooking));
+    }
+
+    @Test
+    public void deleteAllExistingBookings() {
         // given
-        int bookingID = 1;
-        LocalDate fromDate = LocalDate.of(2019, 8, 15);
-        LocalDate toDate = LocalDate.of(2019, 8, 18);
+        // two bookings already exist
+        int firstBookingId = 1, secondBookingId = 2;
 
-        // when and then 1
-        assertThrows(BookingOverlappingException.class,
-                () -> bookingService.updateBooking(bookingID, fromDate, toDate));
+        //when
+        bookingService.deleteAll();
 
-        // when and then 2
-        LocalDate from = LocalDate.of(2019, 8, 3);
-        LocalDate to = LocalDate.of(2019, 8, 17);
+        //then
+        assertThrows(ItemNotFoundException.class, () -> bookingService.findById(firstBookingId));
+        assertThrows(ItemNotFoundException.class, () -> bookingService.findById(secondBookingId));
+    }
 
-        assertThrows(BookingOverlappingException.class,
-                () -> bookingService.updateBooking(bookingID, from, to));
+    @Test
+    public void deleteAllBookingsThatDoNotExist() {
+        // given
+        BookingRepository bookingRepository = new BookingRepository();
+        BookingService bookingService = new BookingService(bookingRepository, roomService, guestService);
+
+        //when and then
+        assertThrows(ItemNotFoundException.class, () -> bookingService.findAll());
     }
 
     @Test
     public void createBookingSuccessfully() {
         //given
-        LocalDate from = LocalDate.of(2019, 10, 3);
-        LocalDate to = LocalDate.of(2019, 10, 8);
-        Booking newBooking = new Booking(4, 583, 6, 5, from, to);
-        int bookingSize = 3;
+        // two bookings already exist
+        int bookingId = 3, guestId = 1, roomId = 1, numberOfPeople = 2;
+        LocalDate thirdFrom = LocalDate.of(2019, 10, 3);
+        LocalDate thirdTo = LocalDate.of(2019, 10, 8);
+        Booking newBooking = new Booking
+                (bookingId, guestId, roomId, numberOfPeople, thirdFrom, thirdTo);
+        int expectedBookingSize = 3;
 
         // when
         bookingService.save(newBooking);
 
         // then
-        assertEquals(bookingSize, bookingService.findAll().size());
+        assertTrue(bookingService.findById(bookingId).equals(newBooking));
+        assertEquals(expectedBookingSize, bookingService.findAll().size());
     }
 
     @Test
-    public void createBookingsNullCheck() {
-        // given
-        Booking[] bookings = null;
-
-        assertThrows(FailedInitializationException.class, () -> bookingService.saveAll(bookings));
-    }
-
-    @Test(expected = FailedInitializationException.class)
     public void createBookingUnsuccessfully() {
         //given
-        LocalDate from = LocalDate.of(2019, 12, 12);
-        LocalDate to = LocalDate.of(2019, 12, 8);
-        Booking newBooking = new Booking(4, 583, 6, 5, from, to);
+        // two bookings already exist
+        int bookingId = 3, guestId = 3, roomId = 7, numberOfPeople = 2;
+        LocalDate thirdFrom = LocalDate.of(2019, 10, 3);
+        LocalDate thirdTo = LocalDate.of(2019, 10, 8);
+        Booking thirdBooking = new Booking
+                (bookingId, guestId, roomId, numberOfPeople, thirdFrom, thirdTo);
+
+        LocalDate from = LocalDate.of(2019, 8, 12);
+        LocalDate to = LocalDate.of(2019, 8, 17);
+        Booking fourthBooking = new Booking(1, 1, 1, 1, from, to);
 
         // when and then
-        assertThrows(FailedInitializationException.class, () -> bookingService.save(newBooking));
+        // overlapping
+        assertThrows(BookingOverlappingException.class, () -> bookingService.save(fourthBooking));
+
+        //invalid room id
+        assertThrows(ItemNotFoundException.class,
+                () -> bookingService.save(thirdBooking));
+
+        assertThrows(FailedInitializationException.class,
+                () -> bookingService.save(null));
     }
 
     @Test
-    public void saveNullCheck() {
+    public void saveAllBookingSuccessfully() {
         //given
-        Booking booking = null;
+        BookingRepository bookingRepository = new BookingRepository();
+        BookingService bookingService = new BookingService(bookingRepository, roomService, guestService);
+        int firstBookingId = 1, firstGuestId = 2, firstRoomId = 3, firstNumOfPeople = 2;
+        int secondBookingId = 2, secondGuestId = 1, secondRoomId = 2, secondNumOfPeople = 1;
+        int expectedSize = 2;
+        LocalDate firstFrom = LocalDate.of(2019, 12, 3);
+        LocalDate firstTo = LocalDate.of(2019, 12, 6);
+        LocalDate secondFrom = LocalDate.of(2019, 12, 13);
+        LocalDate secondTo = LocalDate.of(2019, 12, 16);
+        Booking firstBooking = new Booking
+                (firstBookingId, firstGuestId, firstRoomId, firstNumOfPeople, firstFrom, firstTo);
+        Booking secondBooking = new Booking
+                (secondBookingId, secondGuestId, secondRoomId, secondNumOfPeople, secondFrom, secondTo);
+
+        //when
+        bookingService.saveAll(firstBooking, secondBooking);
+
+        //then
+        assertEquals(expectedSize, bookingService.findAll().size());
+        assertTrue(bookingService.findById(firstBookingId).equals(firstBooking));
+        assertTrue(bookingService.findById(secondBookingId).equals(secondBooking));
+    }
+
+    @Test
+    public void saveAllBookingUnsuccessfully() {
+        //given
+        BookingRepository bookingRepository = new BookingRepository();
+        BookingService bookingService = new BookingService(bookingRepository, roomService, guestService);
+        int firstBookingId = 1, firstGuestId = 2, firstRoomId = 3, firstNumOfPeople = 12;
+        int secondBookingId = 2, secondGuestId = 1, secondRoomId = 7, secondNumOfPeople = 1;
+        LocalDate firstFrom = LocalDate.of(2019, 12, 3);
+        LocalDate firstTo = LocalDate.of(2019, 12, 6);
+        LocalDate secondFrom = LocalDate.of(2019, 12, 13);
+        LocalDate secondTo = LocalDate.of(2019, 12, 16);
+        Booking firstBooking = new Booking
+                (firstBookingId, firstGuestId, firstRoomId, firstNumOfPeople, firstFrom, firstTo);
+        Booking secondBooking = new Booking
+                (secondBookingId, secondGuestId, secondRoomId, secondNumOfPeople, secondFrom, secondTo);
 
         //when and then
-        assertThrows(FailedInitializationException.class, () -> bookingService.save(booking));
-    }
-
-    @Test(expected = FailedInitializationException.class)
-    public void updateBookingInvalidDates() {
-        //given
-        LocalDate fourthFrom = LocalDate.of(2019, 10, 12);
-        LocalDate fourthTo = LocalDate.of(2019, 10, 4);
-        Booking newBooking = new Booking(4, 583, 6,
-                5, fourthFrom, fourthTo);
-
-        // when and then
-        assertThrows(FailedInitializationException.class, () -> bookingService.save(newBooking));
+        //not enough capacity for the first booking and invalid room id for the second
+        assertThrows(FailedInitializationException.class,
+                () -> bookingService.saveAll(firstBooking, secondBooking));
     }
 
     @Test
-    public void findAll() {
+    public void findAllExistingBookings() {
         // given
-        int sizeOfBookings = 2;
+        //two bookings already exist
+        int expectedSize = 2;
 
-        // when and then
-        assertEquals(sizeOfBookings, bookingService.findAll().size());
+        //when
+        int actualSize = bookingService.findAll().size();
+
+        assertEquals(expectedSize, actualSize);
+        assertTrue(bookingService.findAll().contains(firstBooking));
+        assertTrue(bookingService.findAll().contains(secondBooking));
+    }
+
+    @Test
+    public void updateBookingByExistingRoomId() {
+        //given
+        // from double to king size
+        int numberOfPeople = 2, roomId = 3, bookingId = 1, guestId = 1;
+        LocalDate from = LocalDate.of(2019, 8, 15);
+        LocalDate to = LocalDate.of(2019, 8, 18);
+        Booking booking = new Booking
+                (bookingId, guestId, roomId, numberOfPeople, from, to);
+
+        //when
+        bookingService.updateBooking(bookingId, booking);
+        Booking updatedBooking = bookingService.findById(roomRepository.count());
+
+        //then
+        assertTrue(updatedBooking.getRoomId() == booking.getRoomId());
+    }
+
+    @Test
+    public void updateBookingByRoomIdThatDoesNotExist() {
+        //given
+        // from double to king size
+        int numberOfPeople = 2, roomId = 7, bookingId = 1, guestId = 1;
+        LocalDate from = LocalDate.of(2019, 8, 15);
+        LocalDate to = LocalDate.of(2019, 8, 18);
+        Booking booking = new Booking
+                (bookingId, guestId, roomId, numberOfPeople, from, to);
+
+        //when and then
+        assertThrows(ItemNotFoundException.class,
+                () -> bookingService.updateBooking(bookingId, booking));
+    }
+
+    @Test
+    public void updateBookingByNumOfPeopleSuccessfully() {
+        //given
+        // two rooms already exist
+        int bookingId = 1, guestId = 1, numOfPeople = 1, roomId = 1;
+        LocalDate from = LocalDate.of(2019, 8, 15);
+        LocalDate to = LocalDate.of(2019, 8, 18);
+        Booking booking = new Booking(bookingId, guestId, roomId, numOfPeople, from, to);
+
+        //when
+        bookingService.updateBooking(bookingId, booking);
+        Booking updatedBooking = bookingService.findById(bookingRepository.count());
+
+        //then
+        assertTrue(updatedBooking.getNumberOfPeople() == booking.getNumberOfPeople());
+    }
+
+    @Test
+    public void updateBookingByNumOfPeopleUnsuccessfully() {
+        //given
+        int bookingId = 1, guestId = 1, numOfPeople = 12, roomId = 1;
+        LocalDate from = LocalDate.of(2019, 8, 15);
+        LocalDate to = LocalDate.of(2019, 8, 18);
+        Booking booking = new Booking(bookingId, guestId, roomId, numOfPeople, from, to);
+
+        //when and then
+        assertThrows(FailedInitializationException.class,
+                () -> bookingService.updateBooking(bookingId, booking));
+    }
+
+    @Test
+    public void updateBookingSuccessfully() {
+        // given
+        // two bookings already exist
+        int bookingId = 1;
+        LocalDate updateFrom = LocalDate.of(2019, 8, 24);
+        LocalDate updateTo = LocalDate.of(2019, 8, 28);
+
+        //when
+        Booking findBooking = bookingService.updateBookingByDates(bookingId, updateFrom, updateTo);
+
+        assertTrue(bookingService.findById(bookingId).getFrom().equals(findBooking.getFrom()));
+        assertTrue(bookingService.findById(bookingId).getTo().equals(findBooking.getTo()));
+    }
+
+    @Test
+    public void updateBookingUnsuccessfully() {
+        // given
+        // two bookings already exist
+        int bookingId = 1, guestId = 1, numOfPeople = 2, roomId = 1;
+        LocalDate from = LocalDate.of(2019, 8, 19);
+        LocalDate to = LocalDate.of(2019, 8, 27);
+        Booking booking = new Booking(bookingId, guestId, roomId, numOfPeople, from, to);
+        bookingService.save(booking);
+
+        LocalDate updateFrom = LocalDate.of(2019, 8, 17);
+        LocalDate updateTo = LocalDate.of(2019, 8, 24);
+
+        //when and then
+        assertThrows(BookingOverlappingException.class,
+                () -> bookingService.updateBookingByDates(bookingId, updateFrom, updateTo));
     }
 }

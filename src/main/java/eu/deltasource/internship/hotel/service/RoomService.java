@@ -9,22 +9,27 @@ import org.springframework.stereotype.Service;
 import java.util.List;
 
 /**
- * Represents room service
+ * Represents services for a room
  */
 @Service
 public class RoomService {
 
     private final RoomRepository roomRepository;
 
+    /**
+     * This is a constructor
+     *
+     * @param roomRepository rooms repository
+     */
     public RoomService(RoomRepository roomRepository) {
         this.roomRepository = roomRepository;
     }
 
     /**
-     * Searches room by room's ID
+     * Searches room by room's id
      *
-     * @param id room's ID
-     * @return the room with that ID
+     * @param id room's id
+     * @return copy of the found room
      */
     public Room getRoomById(int id) {
         if (roomRepository.existsById(id)) {
@@ -34,58 +39,10 @@ public class RoomService {
     }
 
     /**
-     * Returns all rooms
-     *
-     * @return all rooms
-     */
-    public List<Room> findRooms() {
-        return roomRepository.findAll();
-    }
-
-    /**
-     * Creates a new room
-     *
-     * @param room the new room
-     * @return the new room if
-     */
-    public Room saveRoom(Room room) {
-        if (room == null) {
-            throw new FailedInitializationException("Invalid room !");
-        }
-        roomRepository.save(room);
-        return roomRepository.findById(room.getRoomId());
-    }
-
-    /**
-     * Creates array of rooms
-     *
-     * @param rooms arrays of rooms
-     */
-    public void saveRooms(Room... rooms) {
-        if (rooms == null) {
-            throw new FailedInitializationException("Invalid room !");
-        }
-        roomRepository.saveAll(rooms);
-    }
-
-    /**
-     * Deletes room
-     *
-     * @param room the room that will be deleted/removed
-     * @return true if the room was successfully deleted/removed
-     */
-    public boolean deleteRoom(Room room) {
-        if (room == null) {
-            throw new FailedInitializationException("Invalid room !");
-        }
-        return roomRepository.delete(room);
-    }
-
-    /**
      * Deletes room by id
      *
      * @param id room's id
-     * @return true if the room was successfully deleted/removed
+     * @return true if the room is successfully deleted/removed
      */
     public boolean deleteRoomById(int id) {
         if (roomRepository.existsById(id)) {
@@ -95,15 +52,82 @@ public class RoomService {
     }
 
     /**
+     * Deletes room
+     *
+     * @param room the room that will be deleted/removed
+     * @return true if the room was successfully deleted/removed
+     */
+    public boolean deleteRoom(Room room) {
+        roomValidation(room);
+        getRoomById(room.getRoomId());
+        return roomRepository.delete(room);
+    }
+
+    /**
+     * Deletes all rooms
+     */
+    public void deleteAll() {
+        if (roomRepository.count() == 0) {
+            throw new ItemNotFoundException("Empty list of rooms can not be deleted!");
+        }
+        roomRepository.deleteAll();
+    }
+
+    /**
+     * Creates a new room
+     *
+     * @param room the new room
+     * @return the new room
+     */
+    public void saveRoom(Room room) {
+        roomValidation(room);
+        roomRepository.save(room);
+    }
+
+    /**
+     * Creates array of rooms
+     *
+     * @param rooms array of rooms
+     */
+    public void saveRooms(Room... rooms) {
+        roomsValidation(rooms);
+        roomRepository.saveAll(rooms);
+    }
+
+    /**
+     * @return all rooms
+     */
+    public List<Room> findRooms() {
+        if (roomRepository.count() == 0) {
+            throw new ItemNotFoundException("Empty list of rooms!");
+        }
+        return roomRepository.findAll();
+    }
+
+    /**
      * Updates existing room
      *
      * @param room the room that will be updated
      * @return the updated room
      */
     public Room updateRoom(Room room) {
-        if (room == null) {
+        roomValidation(room);
+        getRoomById(room.getRoomId());
+        return roomRepository.updateRoom(room);
+    }
+
+    private void roomsValidation(Room... rooms) {
+        if (rooms == null || rooms.length == 0) {
+            throw new FailedInitializationException("Invalid rooms !");
+        }
+        for (Room room : rooms) {
+            roomValidation(room);
+        }
+    }
+
+    private void roomValidation(Room room) {
+        if (room == null || room.getCommodities() == null || room.getCommodities().isEmpty()) {
             throw new FailedInitializationException("Invalid room !");
         }
-        return roomRepository.updateRoom(room);
     }
 }

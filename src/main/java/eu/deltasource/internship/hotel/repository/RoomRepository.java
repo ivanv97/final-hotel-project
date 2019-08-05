@@ -11,7 +11,7 @@ import java.util.Collections;
 import java.util.List;
 
 /**
- * Created by Taner Ilyazov - Delta Source Bulgaria on 2019-07-28.
+ * Represents repository for rooms
  */
 @Repository
 public class RoomRepository {

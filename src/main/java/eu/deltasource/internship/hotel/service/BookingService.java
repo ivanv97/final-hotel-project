@@ -8,21 +8,17 @@ import eu.deltasource.internship.hotel.repository.BookingRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-
 import java.time.LocalDate;
-import java.time.Period;
 import java.util.List;
 
 /**
- * Represents booking services
+ * Represents services for bookings
  */
 @Service
 public class BookingService {
 
 	private final BookingRepository bookingRepository;
-
 	private final RoomService roomService;
-
 	private final GuestService guestService;
 
 	@Autowired
@@ -42,7 +38,7 @@ public class BookingService {
 		if (bookingRepository.existsById(id)) {
 			return bookingRepository.findById(id);
 		}
-		throw new ItemNotFoundException("Invalid id");
+		throw new ItemNotFoundException("Invalid id!");
 	}
 
 	/**
@@ -58,94 +54,74 @@ public class BookingService {
 	}
 
 	/**
-	 * Updates existing booking by dates
+	 * Deletes booking
 	 *
-	 * @param bookingId booking's ID
-	 * @param from      starting date
-	 * @param to        ending date
-	 * @return the new booking
+	 * @param booking the booking that will be deleted
+	 * @return true if the booking is successfully deleted
 	 */
-	public Booking updateBooking(int bookingId, LocalDate from, LocalDate to) {
-
-		if (!dateValidation(from, to)) {
-			throw new FailedInitializationException("Invalid dates!");
-		}
-		Booking booking = bookingRepository.findById(bookingId);
-
-		if (!bookingOverlappingValidation(from, to, booking)) {
-			booking.setBookingDates(from, to);
-			return bookingRepository.updateDates(booking);
-		}
-		throw new BookingOverlappingException("Invalid Booking!");
+	public boolean delete(Booking booking) {
+		bookingValidation(booking);
+		findById(booking.getBookingId());
+		return bookingRepository.delete(booking);
 	}
 
+	/**
+	 * Deletes all bookings
+	 */
+	public void deleteAll() {
+		if (bookingRepository.count() == 0) {
+			throw new ItemNotFoundException("Empty list of bookings can not be deleted!");
+		}
+		bookingRepository.deleteAll();
+	}
 
 	/**
-	 * Updates booking by Id
+	 * Updates booking by either room id or number of people
 	 *
-	 * @param bookingId  search room id by booking id
+	 * @param bookingId  id of the booking that will be updated
 	 * @param newBooking the new booking
 	 */
-	public void updateBookingByRoomId(int bookingId, Booking newBooking) {
-		if (!bookingValidation(newBooking)) {
-			throw new FailedInitializationException("Invalid Booking!");
-		}
+	public void updateBooking(int bookingId, Booking newBooking) {
+		bookingValidation(newBooking);
 
-		int searchedRoomId = roomService.getRoomById(newBooking.getRoomId()).getRoomId();
-		int currentBookingRoomID = bookingRepository.findById(bookingId).getRoomId();
-
-		if (bookingRepository.existsById(bookingId) && (currentBookingRoomID == searchedRoomId)) {
+		if (bookingRepository.existsById(bookingId)) {
+			if (newBooking.getGuestId() != findById(bookingId).getGuestId()) {
+				throw new FailedInitializationException("Invalid update!");
+			}
 			deleteById(bookingId);
 			bookingRepository.save(newBooking);
+		} else {
+			throw new ItemNotFoundException("Invalid booking Id");
 		}
-		throw new ItemNotFoundException("Invalid Id");
-	}
-
-	public void updateBookingByRoomId(int bookingId, Booking newBooking) {
-		if (!bookingValidation(newBooking)) {
-			throw new FailedInitializationException("Invalid Booking!");
-		}
-
-		int searchedRoomId = roomService.getRoomById(newBooking.getRoomId()).getRoomId();
-		int currentBookingRoomID = bookingRepository.findById(bookingId).getRoomId();
-
-		if (bookingRepository.existsById(bookingId) && (currentBookingRoomID == searchedRoomId)) {
-			deleteById(bookingId);
-			bookingRepository.save(newBooking);
-		}
-		throw new ItemNotFoundException("Invalid Id");
 	}
 
 	/**
-	 * Checks if the new date overlaps the room's booking
+	 * Updates booking by dates
 	 *
-	 * @param from        starting date
-	 * @param to          ending date
-	 * @param roomBooking room's booking
-	 * @return
+	 * @param bookingId booking's id that will be updated
+	 * @param from      starting date
+	 * @param to        ending date
+	 * @return updated booking
 	 */
-	public boolean checkOverlapping(LocalDate from, LocalDate to, Booking roomBooking) {
+	public Booking updateBookingByDates(int bookingId, LocalDate from, LocalDate to) {
 
-		if (from.isAfter(roomBooking.getFrom()) && to.isAfter(roomBooking.getTo())) {
-			return false;
+		dateValidation(from, to);
+
+		Booking booking = findById(bookingId);
+
+		if (checkDatesOverlapping(from, to, booking.getRoomId(), bookingId)) {
+			return bookingRepository.updateDates(booking);
 		}
-
-		Period period = Period.between(from, to);
-		int totalDays = period.getDays();
-
-		if (from.plusDays(totalDays).isBefore(roomBooking.getFrom())
-			|| from.plusDays(totalDays).isEqual(roomBooking.getFrom())) {
-			return false;
-		}
-		return true;
+		throw new BookingOverlappingException("Overlapping dates!");
 	}
 
 	/**
-	 * Finds all bookings
-	 *
 	 * @return list of all bookings
 	 */
 	public List<Booking> findAll() {
+		if (bookingRepository.count() == 0) {
+			throw new ItemNotFoundException("Empty list!");
+		}
 		return bookingRepository.findAll();
 	}
 
@@ -155,9 +131,8 @@ public class BookingService {
 	 * @param newBooking the new booking
 	 */
 	public void save(Booking newBooking) {
-		if (!bookingValidation(newBooking)) {
-			throw new FailedInitializationException("Invalid booking!");
-		}
+		bookingValidation(newBooking);
+		bookingOverlapping(newBooking.getFrom(), newBooking.getTo(), newBooking.getRoomId());
 		bookingRepository.save(newBooking);
 	}
 
@@ -167,32 +142,84 @@ public class BookingService {
 	 * @param bookings array of bookings
 	 */
 	public void saveAll(Booking... bookings) {
-		if (!bookingValidation(bookings)) {
-			throw new FailedInitializationException("Invalid bookings!");
+		if (bookings == null || bookings.length == 0) {
+			throw new FailedInitializationException("Empty array of bookings");
 		}
-		bookingRepository.saveAll(bookings);
+		for (Booking booking : bookings) {
+			save(booking);
+		}
 	}
 
-	private boolean dateValidation(LocalDate from, LocalDate to) {
-		if (from.isAfter(to) || from.equals(to) || from == null || to == null)
-			return false;
+	private boolean checkDatesOverlapping(LocalDate from, LocalDate to, int roomId, int bookingId, int... idToIgnore) {
+		if (findAll().isEmpty()) {
+			return true;
+		}
+		for (Booking booking : findAll()) {
+			if (booking.getRoomId() == roomId) {
+				if (idToIgnore.length > 0 && booking.getBookingId() == idToIgnore[0]) {
+					continue;
+				}
+				if (bookingId == booking.getBookingId()) {
+					return (checkDatesOverlapping(from, to, roomId, bookingId, bookingId));
+				}
+				if (!from.isBefore(booking.getTo()) || !to.isAfter(booking.getFrom())) {
+					continue;
+				}
+				return false;
+			}
+		}
 		return true;
 	}
 
-	private boolean bookingOverlappingValidation(LocalDate from, LocalDate to, Booking booking) {
-		int roomID = booking.getRoomId();
+	private void bookingValidation(Booking booking) {
+		if (booking == null || !checkBookingFields(booking)) {
+			throw new FailedInitializationException("Invalid Booking!");
+		}
+	}
 
-		for (Booking book : bookingRepository.findAll()) {
-			if (roomID == book.getRoomId() && checkOverlapping(from, to, book)) {
-				return true;
-			}
+	private boolean checkBookingFields(Booking booking) {
+		int roomId = booking.getRoomId(), numberOfPeople = booking.getNumberOfPeople(), guestId = booking.getGuestId();
+		LocalDate from = booking.getFrom();
+		LocalDate to = booking.getTo();
+
+		dateValidation(from, to);
+
+		if (roomService.getRoomById(roomId).getRoomId() == roomId &&
+			roomService.getRoomById(roomId).getRoomCapacity() >= numberOfPeople &&
+			guestService.findById(guestId).getGuestId() == guestId) {
+			return true;
 		}
 		return false;
 	}
 
-	private boolean bookingValidation(Booking... booking) {
-		if (booking == null)
-			return false;
-		return true;
+	private void dateValidation(LocalDate from, LocalDate to) {
+		if (from == null || to == null || from.isAfter(to) || from.equals(to) || from.isBefore(LocalDate.now())) {
+			throw new FailedInitializationException("Invalid dates!");
+		}
+	}
+
+	private void bookingOverlapping(LocalDate from, LocalDate to, int roomId) {
+		if (bookingRepository.count() == 0) {
+			return;
+		}
+
+		for (Booking book : findAll()) {
+			if (book.getRoomId() == roomId) {
+				if ((from.isBefore(book.getFrom()) && to.equals(book.getFrom()) ||
+
+					(from.isBefore(book.getFrom()) && (to.isBefore(book.getFrom()))))) {
+					continue;
+				}
+				if ((book.getFrom().equals(from) || book.getTo().equals(to)) ||
+
+					(from.isBefore(book.getFrom()) && to.isAfter(book.getTo())) ||
+
+					(from.isAfter(book.getFrom()) && to.isBefore(book.getTo())) ||
+
+					(to.isBefore(book.getTo()))) {
+					throw new BookingOverlappingException("Overlapping");
+				}
+			}
+		}
 	}
 }
