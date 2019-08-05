@@ -1,7 +1,7 @@
 package eu.deltasource.internship.hotel.domain;
 
 import eu.deltasource.internship.hotel.exception.FailedInitializationException;
-import lombok.Getter;
+import lombok.*;
 
 
 /**
