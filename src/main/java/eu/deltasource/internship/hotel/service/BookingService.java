@@ -89,7 +89,7 @@ public class BookingService {
 				throw new FailedInitializationException("Invalid update!");
 			}
 			deleteById(bookingId);
-			bookingRepository.save(newBooking);
+			save(newBooking);
 		} else {
 			throw new ItemNotFoundException("Invalid booking Id");
 		}
