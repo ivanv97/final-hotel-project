@@ -16,13 +16,16 @@ import static org.junit.Assert.*;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 public class GuestServiceTest {
-    GuestRepository guestRepository = new GuestRepository();
-    GuestService guestService = new GuestService(guestRepository);
-    Guest firstGuest;
-    Guest secondGuest;
+
+    private GuestRepository guestRepository;
+    private GuestService guestService;
+    private Guest firstGuest;
+    private Guest secondGuest;
 
     @BeforeEach
     public void setUp() {
+        guestRepository = new GuestRepository();
+        guestService = new GuestService(guestRepository);
         firstGuest = new Guest(1, "John", "Miller", Gender.MALE);
         secondGuest = new Guest(2, "Marta", "Peterson", Gender.FEMALE);
 
@@ -33,10 +36,10 @@ public class GuestServiceTest {
     public void findGuestByExistingId() {
         //given
         // two guests already exist
-        int guestID = 1;
+        int guestId = 1;
 
         //when
-        Guest expectedGuest = guestService.findById(guestID);
+        Guest expectedGuest = guestService.findById(guestId);
 
         //then
         assertTrue(expectedGuest.equals(firstGuest));
@@ -46,28 +49,29 @@ public class GuestServiceTest {
     public void findGuestByIdThatDoesNotExist() {
         //given
         // two guests already exists
-        int guestID = -4;
+        int guestId = -4;
 
         //when and then
-        assertThrows(ItemNotFoundException.class, () -> guestService.findById(guestID));
+        assertThrows(ItemNotFoundException.class, () -> guestService.findById(guestId));
     }
 
     @Test
-    public void deleteByExistingId() {
+    public void deleteGuestByExistingId() {
         //given
         // two guests already exist
         int id = 1;
+        boolean expectedResult = true;
 
         //when
         boolean result = guestService.deleteById(id);
 
         //then
-        assertEquals(true, result);
+        assertEquals(expectedResult, result);
         assertThrows(ItemNotFoundException.class, () -> guestService.findById(id));
     }
 
     @Test
-    public void deleteByIdThatDoesNotExist() {
+    public void deleteGuestByIdThatDoesNotExist() {
         //given
         // two guests already exist
         int id = 123;
@@ -80,16 +84,16 @@ public class GuestServiceTest {
     public void deleteExistingGuest() {
         //given
         // two guests already exist
-        int guestId = 2;
-        int expectedSize = 1;
+        int removedGuestId = 2, expectedSize = 1;
+        boolean expectedResult = true;
 
         //when
         boolean result = guestService.deleteGuest(secondGuest);
 
         //then
-        assertEquals(true, result);
+        assertEquals(expectedResult, result);
         assertEquals(expectedSize, guestService.findAll().size());
-        assertThrows(ItemNotFoundException.class, () -> guestService.findById(guestId));
+        assertThrows(ItemNotFoundException.class, () -> guestService.findById(removedGuestId));
     }
 
     @Test
@@ -100,10 +104,8 @@ public class GuestServiceTest {
         Guest newGuest = new Guest(guestId, "Maya", "House", Gender.FEMALE);
 
         //when and then
-        assertThrows(FailedInitializationException.class,
-                () -> guestService.deleteGuest(null));
-        assertThrows(ItemNotFoundException.class,
-                () -> guestService.deleteGuest(newGuest));
+        assertThrows(FailedInitializationException.class, () -> guestService.deleteGuest(null));
+        assertThrows(ItemNotFoundException.class, () -> guestService.deleteGuest(newGuest));
     }
 
     @Test
@@ -149,11 +151,11 @@ public class GuestServiceTest {
         //given
 
         //when and then
+        assertThrows(FailedInitializationException.class, () -> guestService.save(null));
         assertThrows(FailedInitializationException.class,
-                () -> guestService.save(null));
+                () -> guestService.save(new Guest(1, "", "Jackson", null)));
         assertThrows(FailedInitializationException.class,
-                () -> guestService.save(
-                        new Guest(1, "", "Jackson", null)));
+                () -> guestService.save(new Guest(1, "Martin", "", Gender.MALE)));
     }
 
     @Test
@@ -211,11 +213,11 @@ public class GuestServiceTest {
     }
 
     @Test
-    public void updateGuest() {
+    public void updateGuestSuccessfully() {
         //given
         // two guests already exist
-        int guestID = 1;
-        Guest updatedGuest = new Guest(guestID, "Tea", "Toh", Gender.FEMALE);
+        int guestId = 1;
+        Guest updatedGuest = new Guest(guestId, "Tea", "Toh", Gender.FEMALE);
 
         //when
         Guest expectedGuest = guestService.updateGuest(updatedGuest);
@@ -226,8 +228,31 @@ public class GuestServiceTest {
         assertTrue(expectedGuest.getGender().equals(updatedGuest.getGender()));
     }
 
+    @Test
+    public void updateGuestUnsuccessfully() {
+        //given
+        // two guests already exist
+        int invalidGuestId = 7, validGuestId = 1;
+        Guest updatedGuest = new Guest(invalidGuestId, "Tea", "Toh", Gender.FEMALE);
+
+        //when and then
+        // guest with such id does not exist
+        assertThrows(ItemNotFoundException.class, () -> guestService.updateGuest(updatedGuest));
+        // guest without first name
+        assertThrows(FailedInitializationException.class,
+                () -> guestService.updateGuest(new Guest(validGuestId, "", "Johnson", Gender.MALE)));
+        // guest without last name
+        assertThrows(FailedInitializationException.class,
+                () -> guestService.updateGuest(new Guest(validGuestId, "Joe", "", Gender.MALE)));
+        // guest without gender parameter
+        assertThrows(FailedInitializationException.class,
+                () -> guestService.updateGuest(new Guest(validGuestId, "Joe", "Johnson", null)));
+    }
+
     @AfterEach
-    void tearDown() {
+    public void tearDown() {
+        guestService = null;
+        guestRepository = null;
         firstGuest = null;
         secondGuest = null;
     }

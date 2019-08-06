@@ -38,7 +38,7 @@ public class BookingService {
 		if (bookingRepository.existsById(id)) {
 			return bookingRepository.findById(id);
 		}
-		throw new ItemNotFoundException("Invalid id!");
+		throw new ItemNotFoundException("Booking with id " + id + " does not exist!");
 	}
 
 	/**
@@ -50,7 +50,7 @@ public class BookingService {
 		if (bookingRepository.existsById(id)) {
 			return bookingRepository.deleteById(id);
 		}
-		throw new ItemNotFoundException("Booking with such id does not exist!");
+		throw new ItemNotFoundException("Booking with id " + id + " does not exist!");
 	}
 
 	/**
@@ -60,9 +60,8 @@ public class BookingService {
 	 * @return true if the booking is successfully deleted
 	 */
 	public boolean delete(Booking booking) {
-		bookingValidation(booking);
-		findById(booking.getBookingId());
-		return bookingRepository.delete(booking);
+		validBooking(booking);
+		return bookingRepository.delete(findById(booking.getBookingId()));
 	}
 
 	/**
@@ -82,16 +81,17 @@ public class BookingService {
 	 * @param newBooking the new booking
 	 */
 	public void updateBooking(int bookingId, Booking newBooking) {
-		bookingValidation(newBooking);
-
 		if (bookingRepository.existsById(bookingId)) {
-			if (newBooking.getGuestId() != findById(bookingId).getGuestId()) {
-				throw new FailedInitializationException("Invalid update!");
-			}
+			validBooking(newBooking);
+
+			int roomId = newBooking.getRoomId(), guestId = newBooking.getGuestId(), numOfPeople = newBooking.getNumberOfPeople();
+			LocalDate from = newBooking.getFrom(), to = newBooking.getTo();
+
+			validUpdateBooking(newBooking, bookingId);
 			deleteById(bookingId);
-			save(newBooking);
+			save(new Booking(bookingId, guestId, roomId, numOfPeople, from, to));
 		} else {
-			throw new ItemNotFoundException("Invalid booking Id");
+			throw new ItemNotFoundException("Booking with id " + bookingId + " does not exist!");
 		}
 	}
 
@@ -105,11 +105,11 @@ public class BookingService {
 	 */
 	public Booking updateBookingByDates(int bookingId, LocalDate from, LocalDate to) {
 
-		dateValidation(from, to);
+		validDates(from, to);
 
 		Booking booking = findById(bookingId);
 
-		if (checkDatesOverlapping(from, to, booking.getRoomId(), bookingId)) {
+		if (validUpdateDatesOverlapping(from, to, booking.getRoomId(), bookingId)) {
 			return bookingRepository.updateDates(booking);
 		}
 		throw new BookingOverlappingException("Overlapping dates!");
@@ -120,7 +120,7 @@ public class BookingService {
 	 */
 	public List<Booking> findAll() {
 		if (bookingRepository.count() == 0) {
-			throw new ItemNotFoundException("Empty list!");
+			throw new ItemNotFoundException("Empty list of bookings!");
 		}
 		return bookingRepository.findAll();
 	}
@@ -131,8 +131,8 @@ public class BookingService {
 	 * @param newBooking the new booking
 	 */
 	public void save(Booking newBooking) {
-		bookingValidation(newBooking);
-		bookingOverlapping(newBooking.getFrom(), newBooking.getTo(), newBooking.getRoomId());
+		validBooking(newBooking);
+		bookingOverlappingCreateValidation(newBooking.getFrom(), newBooking.getTo(), newBooking.getRoomId());
 		bookingRepository.save(newBooking);
 	}
 
@@ -150,7 +150,16 @@ public class BookingService {
 		}
 	}
 
-	private boolean checkDatesOverlapping(LocalDate from, LocalDate to, int roomId, int bookingId, int... idToIgnore) {
+	private void validUpdateBooking(Booking booking, int bookingId) {
+		if (booking.getGuestId() != findById(bookingId).getGuestId()) {
+			throw new FailedInitializationException("You are not allowed to change guest id!");
+		}
+		if (!validUpdateDatesOverlapping(booking.getFrom(), booking.getTo(), booking.getRoomId(), bookingId, bookingId)) {
+			throw new BookingOverlappingException("The room is already booked for this period!");
+		}
+	}
+
+	private boolean validUpdateDatesOverlapping(LocalDate from, LocalDate to, int roomId, int bookingId, int... idToIgnore) {
 		if (findAll().isEmpty()) {
 			return true;
 		}
@@ -160,7 +169,7 @@ public class BookingService {
 					continue;
 				}
 				if (bookingId == booking.getBookingId()) {
-					return (checkDatesOverlapping(from, to, roomId, bookingId, bookingId));
+					return (validUpdateDatesOverlapping(from, to, roomId, bookingId, bookingId));
 				}
 				if (!from.isBefore(booking.getTo()) || !to.isAfter(booking.getFrom())) {
 					continue;
@@ -171,18 +180,18 @@ public class BookingService {
 		return true;
 	}
 
-	private void bookingValidation(Booking booking) {
-		if (booking == null || !checkBookingFields(booking)) {
+
+	private void validBooking(Booking booking) {
+		if (booking == null || !validBookingFields(booking)) {
 			throw new FailedInitializationException("Invalid Booking!");
 		}
 	}
 
-	private boolean checkBookingFields(Booking booking) {
+	private boolean validBookingFields(Booking booking) {
 		int roomId = booking.getRoomId(), numberOfPeople = booking.getNumberOfPeople(), guestId = booking.getGuestId();
-		LocalDate from = booking.getFrom();
-		LocalDate to = booking.getTo();
+		LocalDate from = booking.getFrom(), to = booking.getTo();
 
-		dateValidation(from, to);
+		validDates(from, to);
 
 		if (roomService.getRoomById(roomId).getRoomId() == roomId &&
 			roomService.getRoomById(roomId).getRoomCapacity() >= numberOfPeople &&
@@ -192,13 +201,13 @@ public class BookingService {
 		return false;
 	}
 
-	private void dateValidation(LocalDate from, LocalDate to) {
+	private void validDates(LocalDate from, LocalDate to) {
 		if (from == null || to == null || from.isAfter(to) || from.equals(to) || from.isBefore(LocalDate.now())) {
 			throw new FailedInitializationException("Invalid dates!");
 		}
 	}
 
-	private void bookingOverlapping(LocalDate from, LocalDate to, int roomId) {
+	private void bookingOverlappingCreateValidation(LocalDate from, LocalDate to, int roomId) {
 		if (bookingRepository.count() == 0) {
 			return;
 		}
@@ -217,9 +226,10 @@ public class BookingService {
 					(from.isAfter(book.getFrom()) && to.isBefore(book.getTo())) ||
 
 					(to.isBefore(book.getTo()))) {
-					throw new BookingOverlappingException("Overlapping");
+					throw new BookingOverlappingException("The booking can not be created because dates are overlapped!");
 				}
 			}
 		}
 	}
 }
+

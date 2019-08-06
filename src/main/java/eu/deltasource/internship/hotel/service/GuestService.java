@@ -37,7 +37,7 @@ public class GuestService {
         if (guestRepository.existsById(id)) {
             return guestRepository.findById(id);
         }
-        throw new ItemNotFoundException("Invalid guest id");
+        throw new ItemNotFoundException("Guest with id " + id + " does not exist!");
     }
 
     /**
@@ -50,7 +50,7 @@ public class GuestService {
         if (guestRepository.existsById(id)) {
             return guestRepository.deleteById(id);
         }
-        throw new ItemNotFoundException("Invalid guest id");
+        throw new ItemNotFoundException("Guest with id " + id + " does not exist!");
     }
 
     /**
@@ -60,9 +60,8 @@ public class GuestService {
      * @return true if the guest if successfully removed
      */
     public boolean deleteGuest(Guest guest) {
-        guestValidation(guest);
-        findById(guest.getGuestId());
-        return guestRepository.delete(guest);
+        validGuest(guest);
+        return guestRepository.delete(findById(guest.getGuestId()));
     }
 
     /**
@@ -81,7 +80,7 @@ public class GuestService {
      * @param guest the new guest
      */
     public void save(Guest guest) {
-        guestValidation(guest);
+        validGuest(guest);
         guestRepository.save(guest);
     }
 
@@ -91,7 +90,7 @@ public class GuestService {
      * @param guests the list of new guests
      */
     public void saveAll(List<Guest> guests) {
-        guestsValidation(guests);
+        validGuests(guests);
         guestRepository.saveAll(guests);
     }
 
@@ -123,20 +122,23 @@ public class GuestService {
      * @return the updated guest
      */
     public Guest updateGuest(Guest guest) {
-        guestValidation(guest);
+        validGuest(guest);
         return guestRepository.updateGuest(guest);
     }
 
-    private void guestsValidation(List<Guest> guests) {
-        if (guests == null || guests.isEmpty()) {
+    private void validGuests(List<Guest> guests) {
+        if (guests == null) {
             throw new FailedInitializationException("Invalid list of guests!");
         }
+        if (guests.isEmpty()) {
+            throw new FailedInitializationException("Empty list of guests!");
+        }
         for (Guest guest : guests) {
-            guestValidation(guest);
+            validGuest(guest);
         }
     }
 
-    private void guestValidation(Guest guest) {
+    private void validGuest(Guest guest) {
         if (guest == null) {
             throw new FailedInitializationException("Invalid guest!");
         }

@@ -26,7 +26,7 @@ public class RoomService {
     }
 
     /**
-     * Searches room by room's id
+     * Searches room by id
      *
      * @param id room's id
      * @return copy of the found room
@@ -35,7 +35,7 @@ public class RoomService {
         if (roomRepository.existsById(id)) {
             return roomRepository.findById(id);
         }
-        throw new ItemNotFoundException("Invalid room id");
+        throw new ItemNotFoundException("Room with id " + id + " does not exist!");
     }
 
     /**
@@ -48,7 +48,7 @@ public class RoomService {
         if (roomRepository.existsById(id)) {
             return roomRepository.deleteById(id);
         }
-        throw new ItemNotFoundException("Room with such ID does not exist!");
+        throw new ItemNotFoundException("Room with id " + id + " does not exist!");
     }
 
     /**
@@ -58,9 +58,8 @@ public class RoomService {
      * @return true if the room was successfully deleted/removed
      */
     public boolean deleteRoom(Room room) {
-        roomValidation(room);
-        getRoomById(room.getRoomId());
-        return roomRepository.delete(room);
+        validRoom(room);
+        return roomRepository.delete(getRoomById(room.getRoomId()));
     }
 
     /**
@@ -80,7 +79,7 @@ public class RoomService {
      * @return the new room
      */
     public void saveRoom(Room room) {
-        roomValidation(room);
+        validRoom(room);
         roomRepository.save(room);
     }
 
@@ -90,7 +89,7 @@ public class RoomService {
      * @param rooms array of rooms
      */
     public void saveRooms(Room... rooms) {
-        roomsValidation(rooms);
+        validRooms(rooms);
         roomRepository.saveAll(rooms);
     }
 
@@ -111,22 +110,23 @@ public class RoomService {
      * @return the updated room
      */
     public Room updateRoom(Room room) {
-        roomValidation(room);
+        validRoom(room);
         getRoomById(room.getRoomId());
         return roomRepository.updateRoom(room);
     }
 
-    private void roomsValidation(Room... rooms) {
+    private void validRooms(Room... rooms) {
         if (rooms == null || rooms.length == 0) {
             throw new FailedInitializationException("Invalid rooms !");
         }
         for (Room room : rooms) {
-            roomValidation(room);
+            validRoom(room);
         }
     }
 
-    private void roomValidation(Room room) {
-        if (room == null || room.getCommodities() == null || room.getCommodities().isEmpty()) {
+    private void validRoom(Room room) {
+        if (room == null || room.getCommodities() == null
+                || room.getCommodities().isEmpty() || room.getCommodities().contains(null)) {
             throw new FailedInitializationException("Invalid room !");
         }
     }
