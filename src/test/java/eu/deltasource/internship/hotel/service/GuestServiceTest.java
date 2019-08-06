@@ -91,6 +91,24 @@ public class GuestServiceTest {
 	}
 
 	@Test
+	public void deleteGuestShouldReturnTrueIfGuestExists() {
+		//Given
+		assertTrue(service.findAll().contains(guest));
+
+		//When
+		assertTrue(service.deleteGuest(guest));
+
+		//Then
+		assertFalse(service.findAll().contains(guest));
+	}
+
+	@Test
+	public void deleteGuestShouldReturnFalseIfGuestDoesNotExist() {
+		assertThrows(ItemNotFoundException.class,
+			() -> service.deleteGuest(new Guest(guest.getGuestId() + 1, "Gergana", "Todorova", Gender.FEMALE)));
+	}
+
+	@Test
 	public void deleteAllShouldEmptyTheRepositoryList() {
 		//Given
 		assertFalse(service.findAll().isEmpty());

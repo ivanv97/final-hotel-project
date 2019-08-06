@@ -22,108 +22,15 @@ public class RoomService {
 
 	private final RoomRepository roomRepository;
 
-    /**
-     * This is a constructor
-     *
-     * @param roomRepository rooms repository
-     */
-    @Autowired
-    public RoomService(RoomRepository roomRepository) {
-        this.roomRepository = roomRepository;
-    }
-
-    /**
-     * Searches room by id
-     *
-     * @param id room's id
-     * @return copy of the found room
-     */
-    public Room getRoomById(int id) {
-        if (roomRepository.existsById(id)) {
-            return roomRepository.findById(id);
-        }
-        throw new ItemNotFoundException("Room with id " + id + " does not exist!");
-    }
-
-    /**
-     * Deletes room by id
-     *
-     * @param id room's id
-     * @return true if the room is successfully deleted/removed
-     */
-    public boolean deleteRoomById(int id) {
-        if (roomRepository.existsById(id)) {
-            return roomRepository.deleteById(id);
-        }
-        throw new ItemNotFoundException("Room with id " + id + " does not exist!");
-    }
-
-    /**
-     * Deletes room
-     *
-     * @param room the room that will be deleted/removed
-     * @return true if the room was successfully deleted/removed
-     */
-    public boolean deleteRoom(Room room) {
-        validRoom(room);
-        return roomRepository.delete(getRoomById(room.getRoomId()));
-    }
-
-    /**
-     * Deletes all rooms
-     */
-    public void deleteAll() {
-        roomRepository.deleteAll();
-    }
-
-    /**
-     * Creates a new room
-     *
-     * @param room the new room
-     * @return the new room
-     */
-    public void saveRoom(Room room) {
-        validRoom(room);
-        roomRepository.save(room);
-    }
-
-    /**
-     * Creates array of rooms
-     *
-     * @param rooms array of rooms
-     */
-    public void saveRooms(Room... rooms) {
-        validRooms(rooms);
-        roomRepository.saveAll(rooms);
-    }
-
-    /**
-     * Updates existing room
-     *
-     * @param room the room that will be updated
-     * @return the updated room
-     */
-    public Room updateRoom(Room room) {
-        validRoom(room);
-        getRoomById(room.getRoomId());
-        return roomRepository.updateRoom(room);
-    }
-
-    private void validRooms(Room... rooms) {
-        if (rooms == null || rooms.length == 0) {
-            throw new FailedInitializationException("Invalid rooms !");
-        }
-        for (Room room : rooms) {
-            validRoom(room);
-        }
-    }
-
-    private void validRoom(Room room) {
-        if (room == null || room.getCommodities() == null
-                || room.getCommodities().isEmpty() || room.getCommodities().contains(null)) {
-            throw new FailedInitializationException("Invalid room !");
-        }
-    }
+	/**
+	 * This is a constructor
+	 *
+	 * @param roomRepository rooms repository
+	 */
+	@Autowired
+	public RoomService(RoomRepository roomRepository) {
+		this.roomRepository = roomRepository;
+	}
 
 	/**
 	 * Returns a list of all the rooms
@@ -134,6 +41,43 @@ public class RoomService {
 	}
 
 	/**
+	 * Searches room by id
+	 *
+	 * @param id room's id
+	 * @return copy of the found room
+	 * @throws ItemNotFoundException if no room with the given
+	 *                               id exists
+	 */
+	public Room getRoomById(int id) {
+		if (roomRepository.existsById(id)) {
+			return roomRepository.findById(id);
+		}
+		throw new ItemNotFoundException("Room with id " + id + " does not exist!");
+	}
+
+	/**
+	 * Creates a new room
+	 * while validating it first
+	 *
+	 * @param room the new room
+	 * @return the new room
+	 */
+	public void saveRoom(Room room) {
+		validateRoom(room);
+		roomRepository.save(room);
+	}
+
+	/**
+	 * Creates array of rooms
+	 *
+	 * @param rooms array of rooms
+	 */
+	public void saveRooms(Room... rooms) {
+		validateRoomList(rooms);
+		roomRepository.saveAll(rooms);
+	}
+
+	/**
 	 * Saves all the rooms
 	 * in the passed list of rooms
 	 *
@@ -141,10 +85,66 @@ public class RoomService {
 	 * @throws ArgumentNotValidException When the list that is passed is null
 	 */
 	public void saveRooms(List<Room> rooms) {
-		if (rooms == null) {
-			throw new ArgumentNotValidException("Rooms list cannot be null!");
-		}
-		validRooms(rooms.toArray(new Room[rooms.size()]));
+		validateRoomList(rooms.toArray(new Room[rooms.size()]));
 		roomRepository.saveAll(rooms);
+	}
+
+	/**
+	 * Updates existing room
+	 *
+	 * @param room the room that will be updated
+	 * @return the updated room
+	 */
+	public Room updateRoom(Room room) {
+		validateRoom(room);
+		getRoomById(room.getRoomId());
+		return roomRepository.updateRoom(room);
+	}
+
+	/**
+	 * Deletes room by id
+	 *
+	 * @param id room's id
+	 * @return true if the room is successfully deleted/removed
+	 */
+	public boolean deleteRoomById(int id) {
+		if (roomRepository.existsById(id)) {
+			return roomRepository.deleteById(id);
+		}
+		throw new ItemNotFoundException("Room with id " + id + " does not exist!");
+	}
+
+	/**
+	 * Deletes room
+	 *
+	 * @param room the room that will be deleted/removed
+	 * @return true if the room was successfully deleted/removed
+	 */
+	public boolean deleteRoom(Room room) {
+		validateRoom(room);
+		return roomRepository.delete(getRoomById(room.getRoomId()));
+	}
+
+	/**
+	 * Deletes all rooms
+	 */
+	public void deleteAll() {
+		roomRepository.deleteAll();
+	}
+
+	private void validateRoomList(Room... rooms) {
+		if (rooms == null || rooms.length == 0) {
+			throw new FailedInitializationException("Invalid rooms !");
+		}
+		for (Room room : rooms) {
+			validateRoom(room);
+		}
+	}
+
+	private void validateRoom(Room room) {
+		if (room == null || room.getCommodities() == null
+			|| room.getCommodities().isEmpty() || room.getCommodities().contains(null)) {
+			throw new FailedInitializationException("Invalid room !");
+		}
 	}
 }

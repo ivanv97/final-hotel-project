@@ -27,12 +27,20 @@ public class GuestService {
 	 * Constructor that takes
 	 * repository object which is annotated as
 	 * Autowired and the repository itself as bean (@Repository)
-	 *
-	 * @param guestRepository
 	 */
 	@Autowired
 	public GuestService(GuestRepository guestRepository) {
 		this.guestRepository = guestRepository;
+	}
+
+	/**
+	 * Gets a list of all the guests -
+	 * if there are any
+	 *
+	 * @return list of all the guests
+	 */
+	public List<Guest> findAll() {
+		return guestRepository.findAll();
 	}
 
 	/**
@@ -49,6 +57,51 @@ public class GuestService {
 			throw new ItemNotFoundException("User does not exist");
 		}
 		return guestRepository.findById(id);
+	}
+
+	/**
+	 * Creates new guest
+	 *
+	 * @param item the new guest
+	 * @throws ArgumentNotValidException if the guest has invalid fields
+	 *                                   or is null
+	 */
+	public void save(Guest item) {
+		validateGuest(item);
+		guestRepository.save(item);
+	}
+
+	/**
+	 * Creates list of new guests
+	 *
+	 * @param guests the list of new guests
+	 */
+	public void saveAll(List<Guest> guests) {
+		validateGuestList(guests);
+		guestRepository.saveAll(guests);
+	}
+
+	/**
+	 * Saves multiple guests
+	 * Takes varargs and checks each arg
+	 * separately for validity
+	 *
+	 * @param items Guest varargs
+	 */
+	public void saveAll(Guest... items) {
+		validateGuestList(Arrays.asList(items));
+		guestRepository.saveAll(items);
+	}
+
+	/**
+	 * Updates an existing guest
+	 *
+	 * @param guest the guest that will be updated
+	 * @return the updated guest
+	 */
+	public Guest updateGuest(Guest guest) {
+		validateGuest(guest);
+		return guestRepository.updateGuest(guest);
 	}
 
 	/**
@@ -72,7 +125,7 @@ public class GuestService {
 	 * @return true if the guest if successfully removed
 	 */
 	public boolean deleteGuest(Guest guest) {
-		validGuest(guest);
+		validateGuest(guest);
 		return guestRepository.delete(findById(guest.getGuestId()));
 	}
 
@@ -83,44 +136,7 @@ public class GuestService {
 		guestRepository.deleteAll();
 	}
 
-	public List<Guest> findAll() {
-		return guestRepository.findAll();
-	}
-
-	/**
-	 * Creates new guest
-	 *
-	 * @param item the new guest
-	 * @throws ArgumentNotValidException if the guest has invalid fields
-	 *                                   or is null
-	 */
-	public void save(Guest item) {
-		validGuest(item);
-		guestRepository.save(item);
-	}
-
-	/**
-	 * Creates list of new guests
-	 *
-	 * @param guests the list of new guests
-	 */
-	public void saveAll(List<Guest> guests) {
-		validGuests(guests);
-		guestRepository.saveAll(guests);
-	}
-
-	/**
-	 * Updates an existing guest
-	 *
-	 * @param guest the guest that will be updated
-	 * @return the updated guest
-	 */
-	public Guest updateGuest(Guest guest) {
-		validGuest(guest);
-		return guestRepository.updateGuest(guest);
-	}
-
-	private void validGuests(List<Guest> guests) {
+	private void validateGuestList(List<Guest> guests) {
 		if (guests == null) {
 			throw new FailedInitializationException("Invalid list of guests!");
 		}
@@ -128,11 +144,11 @@ public class GuestService {
 			throw new FailedInitializationException("Empty list of guests!");
 		}
 		for (Guest guest : guests) {
-			validGuest(guest);
+			validateGuest(guest);
 		}
 	}
 
-	private void validGuest(Guest guest) {
+	private void validateGuest(Guest guest) {
 		if (guest == null) {
 			throw new FailedInitializationException("Invalid guest!");
 		}
@@ -141,17 +157,5 @@ public class GuestService {
 			throw new FailedInitializationException("Invalid guest fields!");
 
 		}
-	}
-
-	/**
-	 * Saves multiple guests
-	 * Takes varargs and checks each arg
-	 * separately for validity
-	 *
-	 * @param items Guest varargs
-	 */
-	public void saveAll(Guest... items) {
-		validGuests(Arrays.asList(items));
-		guestRepository.saveAll(items);
 	}
 }
