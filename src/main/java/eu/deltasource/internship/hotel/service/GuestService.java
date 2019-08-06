@@ -140,9 +140,6 @@ public class GuestService {
 		if (guests == null) {
 			throw new FailedInitializationException("Invalid list of guests!");
 		}
-		if (guests.isEmpty()) {
-			throw new FailedInitializationException("Empty list of guests!");
-		}
 		for (Guest guest : guests) {
 			validateGuest(guest);
 		}

@@ -65,7 +65,6 @@ public class GuestServiceTest {
 		assertEquals(updatedGuest.getFirstName(), service.findById(guest.getGuestId()).getFirstName());
 		assertEquals(updatedGuest.getLastName(), service.findById(guest.getGuestId()).getLastName());
 		assertEquals(Gender.MALE, service.findById(guest.getGuestId()).getGender());
-
 	}
 
 	@Test

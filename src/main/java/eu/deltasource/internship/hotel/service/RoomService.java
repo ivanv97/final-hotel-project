@@ -133,7 +133,7 @@ public class RoomService {
 	}
 
 	private void validateRoomList(Room... rooms) {
-		if (rooms == null || rooms.length == 0) {
+		if (rooms == null) {
 			throw new FailedInitializationException("Invalid rooms !");
 		}
 		for (Room room : rooms) {
