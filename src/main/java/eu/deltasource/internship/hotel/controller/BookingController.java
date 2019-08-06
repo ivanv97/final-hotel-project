@@ -16,7 +16,7 @@ public class BookingController {
 	@Autowired
 	private BookingService bookingService;
 
-	@PostMapping(value = "/create")
+	@PostMapping
 	public void save(@RequestBody Booking newBooking) {
 		bookingService.save(newBooking);
 	}
@@ -26,7 +26,7 @@ public class BookingController {
 		bookingService.saveAll(bookings);
 	}
 
-	@GetMapping(value = "/findAllBookings")
+	@GetMapping
 	public List<Booking> findAll() {
 		return bookingService.findAll();
 	}
