@@ -2,9 +2,8 @@
 
 # MAVEN
 target/
+*.iml
 
 # INTELLIJ
 .idea/
-*.iml
-
 out/
