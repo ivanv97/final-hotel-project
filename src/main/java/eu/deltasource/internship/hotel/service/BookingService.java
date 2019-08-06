@@ -16,7 +16,6 @@ import java.util.List;
  */
 @Service
 public class BookingService {
-
 	private final BookingRepository bookingRepository;
 	private final RoomService roomService;
 	private final GuestService guestService;
@@ -243,4 +242,3 @@ public class BookingService {
 		}
 	}
 }
-

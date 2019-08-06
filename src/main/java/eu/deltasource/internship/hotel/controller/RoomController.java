@@ -15,6 +15,16 @@ public class RoomController {
 	@Autowired
 	private RoomService roomService;
 
+	@PostMapping
+	public void saveRoom(@RequestBody Room room) {
+		roomService.saveRoom(room);
+	}
+
+	@PostMapping
+	public void saveRooms(@RequestBody List<Room> rooms) {
+		roomService.saveRooms(rooms);
+	}
+
 	@GetMapping(value = "/{id}")
 	public Room getRoomById(@PathVariable("id") int id) {
 		return roomService.getRoomById(id);
@@ -25,13 +35,12 @@ public class RoomController {
 		return roomService.findRooms();
 	}
 
-
-	@PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE)
-	public void saveRooms(@RequestBody List<Room> rooms) {
-		roomService.saveRooms(rooms);
+	@PutMapping
+	public Room updateRoom(@RequestBody Room room) {
+		return roomService.updateRoom(room);
 	}
 
-	@DeleteMapping(consumes = MediaType.APPLICATION_JSON_VALUE)
+	@DeleteMapping
 	public boolean deleteRoom(@RequestBody Room room) {
 		return roomService.deleteRoom(room);
 	}
@@ -41,8 +50,8 @@ public class RoomController {
 		return roomService.deleteRoomById(id);
 	}
 
-	@PutMapping(produces = MediaType.APPLICATION_JSON_VALUE, consumes = MediaType.APPLICATION_JSON_VALUE)
-	public Room updateRoom(@RequestBody Room room) {
-		return roomService.updateRoom(room);
+	@DeleteMapping
+	public void deleteAll() {
+		roomService.deleteAll();
 	}
 }

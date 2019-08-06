@@ -3,7 +3,6 @@ package eu.deltasource.internship.hotel.controller;
 import eu.deltasource.internship.hotel.domain.Guest;
 import eu.deltasource.internship.hotel.service.GuestService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -15,6 +14,16 @@ public class GuestController {
 	@Autowired
 	private GuestService guestService;
 
+	@PostMapping
+	public void saveAll(@RequestBody List<Guest> items) {
+		guestService.saveAll(items);
+	}
+
+	@PostMapping
+	public void save(@RequestBody Guest guest) {
+		guestService.save(guest);
+	}
+
 	@GetMapping(value = "/{id}")
 	public Guest findById(@PathVariable("id") int id) {
 		return guestService.findById(id);
@@ -25,7 +34,7 @@ public class GuestController {
 		return guestService.findAll();
 	}
 
-	@PutMapping(produces = MediaType.APPLICATION_JSON_VALUE, consumes = MediaType.APPLICATION_JSON_VALUE)
+	@PutMapping
 	public Guest updateGuest(@RequestBody Guest guest) {
 		return guestService.updateGuest(guest);
 	}
@@ -35,8 +44,13 @@ public class GuestController {
 		return guestService.deleteById(id);
 	}
 
-	@PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE)
-	public void saveAll(@RequestBody List<Guest> items) {
-		guestService.saveAll(items);
+	@DeleteMapping
+	public void deleteAll() {
+		guestService.deleteAll();
+	}
+
+	@DeleteMapping
+	public boolean deleteGuest(@RequestBody Guest guest) {
+		return guestService.deleteGuest(guest);
 	}
 }

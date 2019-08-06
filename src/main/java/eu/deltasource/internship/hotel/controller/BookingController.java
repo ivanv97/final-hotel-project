@@ -13,33 +13,53 @@ import java.util.List;
 @RequestMapping("/booking")
 public class BookingController {
 
-    @Autowired
-    private BookingService bookingService;
+	@Autowired
+	private BookingService bookingService;
 
-    @PostMapping(value = "/create")
-    public void save(@RequestBody Booking newBooking) {
-        bookingService.save(newBooking);
-    }
+	@PostMapping(value = "/create")
+	public void save(@RequestBody Booking newBooking) {
+		bookingService.save(newBooking);
+	}
 
-    @GetMapping(value = "/findAllBookings")
-    public List<Booking> findAll() {
-        return bookingService.findAll();
-    }
+	@PostMapping
+	public void saveAll(List<Booking> bookings) {
+		bookingService.saveAll(bookings);
+	}
 
-    @GetMapping(value = "/{ID}")
-    public Booking findById(@PathVariable("ID") int ID) {
-        return bookingService.findById(ID);
-    }
+	@GetMapping(value = "/findAllBookings")
+	public List<Booking> findAll() {
+		return bookingService.findAll();
+	}
 
-    @DeleteMapping(value = "/{ID}")
-    public boolean deleteByID(@PathVariable("ID") int ID) {
-        return bookingService.deleteById(ID);
-    }
+	@GetMapping(value = "/{id}")
+	public Booking findById(@PathVariable("id") int id) {
+		return bookingService.findById(id);
+	}
 
-    @PutMapping(value = "/{ID}")
-    public void updateBooking(@PathVariable("ID") int bookingID, @RequestBody Date dates) {
-        bookingService.updateBookingByDates(bookingID, dates.getFrom(), dates.getTo());
-    }
+	@PutMapping(value = "/{id}")
+	public void updateBookingByDates(@PathVariable("id") int bookingId, @RequestBody Date dates) {
+		bookingService.updateBookingByDates(bookingId, dates.getFrom(), dates.getTo());
+	}
+
+	@PutMapping(value = "/{id}")
+	public void updateBooking(@PathVariable("id") int bookingId, @RequestBody Booking updatedBooking) {
+		bookingService.updateBooking(bookingId, updatedBooking);
+	}
+
+	@DeleteMapping(value = "/{id}")
+	public boolean deleteById(@PathVariable("id") int id) {
+		return bookingService.deleteById(id);
+	}
+
+	@DeleteMapping
+	public boolean delete(@RequestBody Booking booking) {
+		return bookingService.delete(booking);
+	}
+
+	@DeleteMapping
+	public void deleteAll() {
+		bookingService.deleteAll();
+	}
 }
 
 //import eu.deltasource.internship.hotel.domain.Booking;
