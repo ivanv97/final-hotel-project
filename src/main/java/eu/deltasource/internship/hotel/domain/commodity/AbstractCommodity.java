@@ -1,20 +1,21 @@
 package eu.deltasource.internship.hotel.domain.commodity;
 
+import lombok.Getter;
+import org.springframework.stereotype.Component;
+
 /**
  * Created by Taner Ilyazov - Delta Source Bulgaria on 2019-07-28.
  */
+@Component
 public abstract class AbstractCommodity {
 
+	@Getter
     protected final int inventoryId;
 
     private static int INVENTORY_COUNT;
 
     public AbstractCommodity() {
         this.inventoryId = ++INVENTORY_COUNT;
-    }
-
-    public int getInventoryId() {
-        return inventoryId;
     }
 
     public abstract void prepare();

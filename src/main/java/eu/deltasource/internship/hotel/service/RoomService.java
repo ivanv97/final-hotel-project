@@ -2,25 +2,32 @@ package eu.deltasource.internship.hotel.service;
 
 import eu.deltasource.internship.hotel.domain.Room;
 import eu.deltasource.internship.hotel.exception.FailedInitializationException;
+import eu.deltasource.internship.hotel.exception.ArgumentNotValidException;
 import eu.deltasource.internship.hotel.exception.ItemNotFoundException;
 import eu.deltasource.internship.hotel.repository.RoomRepository;
+
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 
 /**
- * Represents services for a room
+ * Service class for the
+ * logic of room actions -
+ * adding, updating, deleting
+ * and getting rooms
  */
 @Service
 public class RoomService {
 
-    private final RoomRepository roomRepository;
+	private final RoomRepository roomRepository;
 
     /**
      * This is a constructor
      *
      * @param roomRepository rooms repository
      */
+    @Autowired
     public RoomService(RoomRepository roomRepository) {
         this.roomRepository = roomRepository;
     }
@@ -66,9 +73,6 @@ public class RoomService {
      * Deletes all rooms
      */
     public void deleteAll() {
-        if (roomRepository.count() == 0) {
-            throw new ItemNotFoundException("Empty list of rooms can not be deleted!");
-        }
         roomRepository.deleteAll();
     }
 
@@ -91,16 +95,6 @@ public class RoomService {
     public void saveRooms(Room... rooms) {
         validRooms(rooms);
         roomRepository.saveAll(rooms);
-    }
-
-    /**
-     * @return all rooms
-     */
-    public List<Room> findRooms() {
-        if (roomRepository.count() == 0) {
-            throw new ItemNotFoundException("Empty list of rooms!");
-        }
-        return roomRepository.findAll();
     }
 
     /**
@@ -130,4 +124,27 @@ public class RoomService {
             throw new FailedInitializationException("Invalid room !");
         }
     }
+
+	/**
+	 * Returns a list of all the rooms
+	 * if no rooms yet - empty list
+	 */
+	public List<Room> findRooms() {
+		return roomRepository.findAll();
+	}
+
+	/**
+	 * Saves all the rooms
+	 * in the passed list of rooms
+	 *
+	 * @param rooms
+	 * @throws ArgumentNotValidException When the list that is passed is null
+	 */
+	public void saveRooms(List<Room> rooms) {
+		if (rooms == null) {
+			throw new ArgumentNotValidException("Rooms list cannot be null!");
+		}
+		validRooms(rooms.toArray(new Room[rooms.size()]));
+		roomRepository.saveAll(rooms);
+	}
 }

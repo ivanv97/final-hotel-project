@@ -1,20 +1,19 @@
 package eu.deltasource.internship.hotel.domain.commodity;
 
+import lombok.Getter;
+
 /**
  * Represents bed in a hotel room
  */
 public class Bed extends AbstractCommodity {
 
+	@Getter
     private final BedType bedType;
 
     public Bed(BedType bedType) {
         super();
         this.bedType = bedType;
 
-    }
-
-    public BedType getBedType() {
-        return bedType;
     }
 
     public int getSize() {

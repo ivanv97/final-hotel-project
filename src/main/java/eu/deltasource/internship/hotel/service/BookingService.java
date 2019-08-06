@@ -3,6 +3,7 @@ package eu.deltasource.internship.hotel.service;
 import eu.deltasource.internship.hotel.domain.Booking;
 import eu.deltasource.internship.hotel.exception.BookingOverlappingException;
 import eu.deltasource.internship.hotel.exception.FailedInitializationException;
+import eu.deltasource.internship.hotel.exception.ArgumentNotValidException;
 import eu.deltasource.internship.hotel.exception.ItemNotFoundException;
 import eu.deltasource.internship.hotel.repository.BookingRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,19 +30,6 @@ public class BookingService {
 	}
 
 	/**
-	 * Searches booking by id
-	 *
-	 * @param id booking's id
-	 * @return the found booking
-	 */
-	public Booking findById(int id) {
-		if (bookingRepository.existsById(id)) {
-			return bookingRepository.findById(id);
-		}
-		throw new ItemNotFoundException("Booking with id " + id + " does not exist!");
-	}
-
-	/**
 	 * Deletes booking by id
 	 *
 	 * @param id booking's id
@@ -62,16 +50,6 @@ public class BookingService {
 	public boolean delete(Booking booking) {
 		validBooking(booking);
 		return bookingRepository.delete(findById(booking.getBookingId()));
-	}
-
-	/**
-	 * Deletes all bookings
-	 */
-	public void deleteAll() {
-		if (bookingRepository.count() == 0) {
-			throw new ItemNotFoundException("Empty list of bookings can not be deleted!");
-		}
-		bookingRepository.deleteAll();
 	}
 
 	/**
@@ -104,25 +82,14 @@ public class BookingService {
 	 * @return updated booking
 	 */
 	public Booking updateBookingByDates(int bookingId, LocalDate from, LocalDate to) {
-
 		validDates(from, to);
-
 		Booking booking = findById(bookingId);
 
 		if (validUpdateDatesOverlapping(from, to, booking.getRoomId(), bookingId)) {
+			booking.setBookingDates(from, to);
 			return bookingRepository.updateDates(booking);
 		}
 		throw new BookingOverlappingException("Overlapping dates!");
-	}
-
-	/**
-	 * @return list of all bookings
-	 */
-	public List<Booking> findAll() {
-		if (bookingRepository.count() == 0) {
-			throw new ItemNotFoundException("Empty list of bookings!");
-		}
-		return bookingRepository.findAll();
 	}
 
 	/**
@@ -142,7 +109,7 @@ public class BookingService {
 	 * @param bookings array of bookings
 	 */
 	public void saveAll(Booking... bookings) {
-		if (bookings == null || bookings.length == 0) {
+		if (bookings == null) {
 			throw new FailedInitializationException("Empty array of bookings");
 		}
 		for (Booking booking : bookings) {
@@ -230,6 +197,51 @@ public class BookingService {
 				}
 			}
 		}
+	}
+
+	/**
+	 * Returns a list of
+	 * all bookings for all rooms
+	 */
+	public List<Booking> findAll() {
+		return bookingRepository.findAll();
+	}
+
+	/**
+	 * Gets a booking by its ID
+	 *
+	 * @param id to be searched by
+	 * @return Booking object that matches the given id
+	 * @throws ItemNotFoundException If the Id doesn't exist in the database
+	 */
+	public Booking findById(int id) {
+		if (!bookingRepository.existsById(id)) {
+			throw new ItemNotFoundException("There are no bookings with that ID!");
+		}
+		return bookingRepository.findById(id);
+	}
+
+
+	/**
+	 * Saves a list of booking objects
+	 * Checks each one separately beforehand
+	 *
+	 * @param items The list we want to save
+	 * @throws ArgumentNotValidException If any of the booking
+	 *                                   objects is not valid
+	 */
+	public void saveAll(List<Booking> items) {
+		for (Booking item : items) {
+			bookingRepository.save(item);
+		}
+	}
+
+	/**
+	 * Deletes every single booking
+	 * from the repo
+	 */
+	public void deleteAll() {
+		bookingRepository.deleteAll();
 	}
 }
 
