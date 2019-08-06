@@ -1,8 +1,11 @@
 package eu.deltasource.internship.hotel.domain.commodity;
 
+import lombok.Getter;
+
 /**
  * Represents bed in a hotel room
  */
+@Getter
 public class Bed extends AbstractCommodity {
 
     private final BedType bedType;
@@ -25,5 +28,4 @@ public class Bed extends AbstractCommodity {
     public void prepare() {
         System.out.println("The bed sheets are being replaced!");
     }
-
 }

@@ -1,14 +1,15 @@
 package eu.deltasource.internship.hotel.domain;
 
 import eu.deltasource.internship.hotel.exception.FailedInitializationException;
-import lombok.Data;
+
+import lombok.Getter;
 
 import java.time.LocalDate;
 
 /**
  * Represents booking for a hotel room
  */
-@Data
+@Getter
 public class Booking {
 
 	private final int bookingId;

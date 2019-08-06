@@ -13,5 +13,4 @@ public class Shower extends AbstractCommodity {
     public void prepare() {
         System.out.println("The shower is being cleaned!");
     }
-
 }

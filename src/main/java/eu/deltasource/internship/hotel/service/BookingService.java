@@ -68,9 +68,6 @@ public class BookingService {
 	 * Deletes all bookings
 	 */
 	public void deleteAll() {
-		if (bookingRepository.count() == 0) {
-			throw new ItemNotFoundException("Empty list of bookings can not be deleted!");
-		}
 		bookingRepository.deleteAll();
 	}
 
@@ -110,6 +107,7 @@ public class BookingService {
 		Booking booking = findById(bookingId);
 
 		if (validUpdateDatesOverlapping(from, to, booking.getRoomId(), bookingId)) {
+			booking.setBookingDates(from, to);
 			return bookingRepository.updateDates(booking);
 		}
 		throw new BookingOverlappingException("Overlapping dates!");
@@ -142,8 +140,8 @@ public class BookingService {
 	 * @param bookings array of bookings
 	 */
 	public void saveAll(Booking... bookings) {
-		if (bookings == null || bookings.length == 0) {
-			throw new FailedInitializationException("Empty array of bookings");
+		if (bookings == null) {
+			throw new FailedInitializationException("Invalid bookings!");
 		}
 		for (Booking booking : bookings) {
 			save(booking);
@@ -232,4 +230,3 @@ public class BookingService {
 		}
 	}
 }
-

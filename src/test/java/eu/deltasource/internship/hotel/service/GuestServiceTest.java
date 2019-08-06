@@ -17,243 +17,224 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 
 public class GuestServiceTest {
 
-    private GuestRepository guestRepository;
-    private GuestService guestService;
-    private Guest firstGuest;
-    private Guest secondGuest;
+	private GuestRepository guestRepository;
+	private GuestService guestService;
+	private Guest firstGuest;
+	private Guest secondGuest;
 
-    @BeforeEach
-    public void setUp() {
-        guestRepository = new GuestRepository();
-        guestService = new GuestService(guestRepository);
-        firstGuest = new Guest(1, "John", "Miller", Gender.MALE);
-        secondGuest = new Guest(2, "Marta", "Peterson", Gender.FEMALE);
+	@BeforeEach
+	public void setUp() {
+		guestRepository = new GuestRepository();
+		guestService = new GuestService(guestRepository);
+		firstGuest = new Guest(1, "John", "Miller", Gender.MALE);
+		secondGuest = new Guest(2, "Marta", "Peterson", Gender.FEMALE);
 
-        guestRepository.saveAll(firstGuest, secondGuest);
-    }
+		guestRepository.saveAll(firstGuest, secondGuest);
+	}
 
-    @Test
-    public void findGuestByExistingId() {
-        //given
-        // two guests already exist
-        int guestId = 1;
+	@Test
+	public void findGuestByExistingId() {
+		//given
+		// two guests already exist
+		int guestId = 1;
 
-        //when
-        Guest expectedGuest = guestService.findById(guestId);
+		//when
+		Guest expectedGuest = guestService.findById(guestId);
 
-        //then
-        assertTrue(expectedGuest.equals(firstGuest));
-    }
+		//then
+		assertTrue(expectedGuest.equals(firstGuest));
+	}
 
-    @Test
-    public void findGuestByIdThatDoesNotExist() {
-        //given
-        // two guests already exists
-        int guestId = -4;
+	@Test
+	public void findGuestByIdThatDoesNotExist() {
+		//given
+		// two guests already exists
+		int guestId = -4;
 
-        //when and then
-        assertThrows(ItemNotFoundException.class, () -> guestService.findById(guestId));
-    }
+		//when and then
+		assertThrows(ItemNotFoundException.class, () -> guestService.findById(guestId));
+	}
 
-    @Test
-    public void deleteGuestByExistingId() {
-        //given
-        // two guests already exist
-        int id = 1;
-        boolean expectedResult = true;
+	@Test
+	public void deleteGuestByExistingId() {
+		//given
+		// two guests already exist
+		int id = 1;
+		boolean expectedResult = true;
 
-        //when
-        boolean result = guestService.deleteById(id);
+		//when
+		boolean result = guestService.deleteById(id);
 
-        //then
-        assertEquals(expectedResult, result);
-        assertThrows(ItemNotFoundException.class, () -> guestService.findById(id));
-    }
+		//then
+		assertEquals(expectedResult, result);
+		assertThrows(ItemNotFoundException.class, () -> guestService.findById(id));
+	}
 
-    @Test
-    public void deleteGuestByIdThatDoesNotExist() {
-        //given
-        // two guests already exist
-        int id = 123;
+	@Test
+	public void deleteGuestByIdThatDoesNotExist() {
+		//given
+		// two guests already exist
+		int id = 123;
 
-        //when and then
-        assertThrows(ItemNotFoundException.class, () -> guestService.deleteById(id));
-    }
+		//when and then
+		assertThrows(ItemNotFoundException.class, () -> guestService.deleteById(id));
+	}
 
-    @Test
-    public void deleteExistingGuest() {
-        //given
-        // two guests already exist
-        int removedGuestId = 2, expectedSize = 1;
-        boolean expectedResult = true;
+	@Test
+	public void deleteExistingGuest() {
+		//given
+		// two guests already exist
+		int removedGuestId = 2, expectedSize = 1;
+		boolean expectedResult = true;
 
-        //when
-        boolean result = guestService.deleteGuest(secondGuest);
+		//when
+		boolean result = guestService.deleteGuest(secondGuest);
 
-        //then
-        assertEquals(expectedResult, result);
-        assertEquals(expectedSize, guestService.findAll().size());
-        assertThrows(ItemNotFoundException.class, () -> guestService.findById(removedGuestId));
-    }
+		//then
+		assertEquals(expectedResult, result);
+		assertEquals(expectedSize, guestService.findAll().size());
+		assertThrows(ItemNotFoundException.class, () -> guestService.findById(removedGuestId));
+	}
 
-    @Test
-    public void deleteGuestThatDoesNotExist() {
-        //given
-        // two guests already exist
-        int guestId = 3;
-        Guest newGuest = new Guest(guestId, "Maya", "House", Gender.FEMALE);
+	@Test
+	public void deleteGuestThatDoesNotExist() {
+		//given
+		// two guests already exist
+		int guestId = 3;
+		Guest newGuest = new Guest(guestId, "Maya", "House", Gender.FEMALE);
 
-        //when and then
-        assertThrows(FailedInitializationException.class, () -> guestService.deleteGuest(null));
-        assertThrows(ItemNotFoundException.class, () -> guestService.deleteGuest(newGuest));
-    }
+		//when and then
+		assertThrows(FailedInitializationException.class, () -> guestService.deleteGuest(null));
+		assertThrows(ItemNotFoundException.class, () -> guestService.deleteGuest(newGuest));
+	}
 
-    @Test
-    public void deleteAllExistingGuests() {
-        //given
-        // two guests already exist
+	@Test
+	public void deleteAllExistingGuests() {
+		//given
+		// two guests already exist
+		int expectedSize = 0;
 
-        //when
-        guestService.deleteAll();
+		//when
+		guestService.deleteAll();
 
-        //then
-        assertThrows(ItemNotFoundException.class, () -> guestService.findAll());
-    }
+		//then
+		assertEquals(expectedSize, guestService.findAll().size());
+	}
 
-    @Test
-    public void deleteAllGuestsThatDoNotExist() {
-        //given
-        GuestRepository guestRepository = new GuestRepository();
-        GuestService guestService = new GuestService(guestRepository);
+	@Test
+	public void createGuestSuccessfully() {
+		//given
+		// two guests already exist
+		int guestId = 3;
+		int expectedListOfGuestSize = 3;
+		Guest guest = new Guest(guestId, "Daniel", "Garcia", Gender.MALE);
 
-        //when and then
-        assertThrows(ItemNotFoundException.class, () -> guestService.deleteAll());
-    }
+		//when
+		guestService.save(guest);
 
-    @Test
-    public void createGuestSuccessfully() {
-        //given
-        // two guests already exist
-        int guestId = 3;
-        int expectedListOfGuestSize = 3;
-        Guest guest = new Guest(guestId, "Daniel", "Garcia", Gender.MALE);
+		//then
+		assertEquals(expectedListOfGuestSize, guestService.findAll().size());
+		assertTrue(guest.equals(guestService.findById(guestId)));
+	}
 
-        //when
-        guestService.save(guest);
+	@Test
+	public void createGuestUnsuccessfully() {
+		//given
 
-        //then
-        assertEquals(expectedListOfGuestSize, guestService.findAll().size());
-        assertTrue(guest.equals(guestService.findById(guestId)));
-    }
+		//when and then
+		assertThrows(FailedInitializationException.class, () -> guestService.save(null));
+		assertThrows(FailedInitializationException.class,
+			() -> guestService.save(new Guest(1, "", "Jackson", null)));
+		assertThrows(FailedInitializationException.class,
+			() -> guestService.save(new Guest(1, "Martin", "", Gender.MALE)));
+	}
 
-    @Test
-    public void createGuestUnsuccessfully() {
-        //given
+	@Test
+	public void createListOfGuestsSuccessfully() {
+		//given
+		List<Guest> guests = new ArrayList<>();
+		guests.add(new Guest(1, "Mariya", "Miller", Gender.FEMALE));
+		guests.add(new Guest(2, "Sean", "Jean", Gender.MALE));
+		int listSize = guests.size();
+		GuestRepository guestRepository = new GuestRepository();
+		GuestService guestService = new GuestService(guestRepository);
 
-        //when and then
-        assertThrows(FailedInitializationException.class, () -> guestService.save(null));
-        assertThrows(FailedInitializationException.class,
-                () -> guestService.save(new Guest(1, "", "Jackson", null)));
-        assertThrows(FailedInitializationException.class,
-                () -> guestService.save(new Guest(1, "Martin", "", Gender.MALE)));
-    }
+		//when
+		guestService.saveAll(guests);
 
-    @Test
-    public void createListOfGuestsSuccessfully() {
-        //given
-        List<Guest> guests = new ArrayList<>();
-        guests.add(new Guest(1, "Mariya", "Miller", Gender.FEMALE));
-        guests.add(new Guest(2, "Sean", "Jean", Gender.MALE));
-        int listSize = guests.size();
-        GuestRepository guestRepository = new GuestRepository();
-        GuestService guestService = new GuestService(guestRepository);
+		//then
+		assertEquals(listSize, guestService.findAll().size());
+		assertTrue(guestService.findAll().contains(guests.get(0)));
+		assertTrue(guestService.findAll().contains(guests.get(1)));
+	}
 
-        //when
-        guestService.saveAll(guests);
+	@Test
+	public void createListOfGuestsUnsuccessfully() {
+		//given
+		List<Guest> guests = null;
+		List<Guest> guestList = new ArrayList<>();
+		guestList.add(null);
 
-        //then
-        assertEquals(listSize, guestService.findAll().size());
-        assertTrue(guestService.findAll().contains(guests.get(0)));
-        assertTrue(guestService.findAll().contains(guests.get(1)));
-    }
+		//when and then
+		assertThrows(FailedInitializationException.class, () -> guestService.saveAll(guests));
+		assertThrows(FailedInitializationException.class, () -> guestService.saveAll(guestList));
+	}
 
-    @Test
-    public void createListOfGuestsUnsuccessfully() {
-        //given
-        List<Guest> guests = new ArrayList<>();
-        List<Guest> guestList = new ArrayList<>();
-        guestList.add(null);
+	@Test
+	public void findAllExistingGuests() {
+		//given
+		// two guests already exist
+		int expectedSize = 2;
 
-        //when and then
-        assertThrows(FailedInitializationException.class, () -> guestService.saveAll(guests));
-        assertThrows(FailedInitializationException.class, () -> guestService.saveAll(guestList));
-    }
+		//when
+		List<Guest> expectedGuests = guestService.findAll();
 
-    @Test
-    public void findAllExistingGuests() {
-        //given
-        // two guests already exist
-        int expectedSize = 2;
+		//then
+		assertEquals(expectedSize, expectedGuests.size());
+	}
 
-        //when
-        List<Guest> expectedGuests = guestService.findAll();
+	@Test
+	public void updateGuestSuccessfully() {
+		//given
+		// two guests already exist
+		int guestId = 1;
+		Guest updatedGuest = new Guest(guestId, "Tea", "Toh", Gender.FEMALE);
 
-        //then
-        assertEquals(expectedSize, expectedGuests.size());
-    }
+		//when
+		Guest expectedGuest = guestService.updateGuest(updatedGuest);
 
-    @Test
-    public void findAllGuestsThatDoNotExist() {
-        //given
-        GuestRepository guestRepository = new GuestRepository();
-        GuestService guestService = new GuestService(guestRepository);
+		//then
+		assertTrue(expectedGuest.getFirstName().equals(updatedGuest.getFirstName()));
+		assertTrue(expectedGuest.getLastName().equals(updatedGuest.getLastName()));
+		assertTrue(expectedGuest.getGender().equals(updatedGuest.getGender()));
+	}
 
-        //when and then
-        assertThrows(ItemNotFoundException.class, () -> guestService.findAll());
-    }
+	@Test
+	public void updateGuestUnsuccessfully() {
+		//given
+		// two guests already exist
+		int invalidGuestId = 7, validGuestId = 1;
+		Guest updatedGuest = new Guest(invalidGuestId, "Tea", "Toh", Gender.FEMALE);
 
-    @Test
-    public void updateGuestSuccessfully() {
-        //given
-        // two guests already exist
-        int guestId = 1;
-        Guest updatedGuest = new Guest(guestId, "Tea", "Toh", Gender.FEMALE);
+		//when and then
+		// guest with such id does not exist
+		assertThrows(ItemNotFoundException.class, () -> guestService.updateGuest(updatedGuest));
+		// guest without first name
+		assertThrows(FailedInitializationException.class,
+			() -> guestService.updateGuest(new Guest(validGuestId, "", "Johnson", Gender.MALE)));
+		// guest without last name
+		assertThrows(FailedInitializationException.class,
+			() -> guestService.updateGuest(new Guest(validGuestId, "Joe", "", Gender.MALE)));
+		// guest without gender parameter
+		assertThrows(FailedInitializationException.class,
+			() -> guestService.updateGuest(new Guest(validGuestId, "Joe", "Johnson", null)));
+	}
 
-        //when
-        Guest expectedGuest = guestService.updateGuest(updatedGuest);
-
-        //then
-        assertTrue(expectedGuest.getFirstName().equals(updatedGuest.getFirstName()));
-        assertTrue(expectedGuest.getLastName().equals(updatedGuest.getLastName()));
-        assertTrue(expectedGuest.getGender().equals(updatedGuest.getGender()));
-    }
-
-    @Test
-    public void updateGuestUnsuccessfully() {
-        //given
-        // two guests already exist
-        int invalidGuestId = 7, validGuestId = 1;
-        Guest updatedGuest = new Guest(invalidGuestId, "Tea", "Toh", Gender.FEMALE);
-
-        //when and then
-        // guest with such id does not exist
-        assertThrows(ItemNotFoundException.class, () -> guestService.updateGuest(updatedGuest));
-        // guest without first name
-        assertThrows(FailedInitializationException.class,
-                () -> guestService.updateGuest(new Guest(validGuestId, "", "Johnson", Gender.MALE)));
-        // guest without last name
-        assertThrows(FailedInitializationException.class,
-                () -> guestService.updateGuest(new Guest(validGuestId, "Joe", "", Gender.MALE)));
-        // guest without gender parameter
-        assertThrows(FailedInitializationException.class,
-                () -> guestService.updateGuest(new Guest(validGuestId, "Joe", "Johnson", null)));
-    }
-
-    @AfterEach
-    public void tearDown() {
-        guestService = null;
-        guestRepository = null;
-        firstGuest = null;
-        secondGuest = null;
-    }
+	@AfterEach
+	public void tearDown() {
+		guestService = null;
+		guestRepository = null;
+		firstGuest = null;
+		secondGuest = null;
+	}
 }
