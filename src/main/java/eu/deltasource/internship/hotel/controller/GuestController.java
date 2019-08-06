@@ -14,7 +14,7 @@ public class GuestController {
 	@Autowired
 	private GuestService guestService;
 
-	@PostMapping
+	@PostMapping(value = "/multiple")
 	public void saveAll(@RequestBody List<Guest> items) {
 		guestService.saveAll(items);
 	}
@@ -44,12 +44,12 @@ public class GuestController {
 		return guestService.deleteById(id);
 	}
 
-	@DeleteMapping
+	@DeleteMapping(value = "/all")
 	public void deleteAll() {
 		guestService.deleteAll();
 	}
 
-	@DeleteMapping
+	@DeleteMapping(value = "/guest")
 	public boolean deleteGuest(@RequestBody Guest guest) {
 		return guestService.deleteGuest(guest);
 	}

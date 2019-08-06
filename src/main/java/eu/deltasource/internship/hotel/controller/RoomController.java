@@ -20,7 +20,7 @@ public class RoomController {
 		roomService.saveRoom(room);
 	}
 
-	@PostMapping
+	@PostMapping(value = "/multiple")
 	public void saveRooms(@RequestBody List<Room> rooms) {
 		roomService.saveRooms(rooms);
 	}
@@ -40,7 +40,7 @@ public class RoomController {
 		return roomService.updateRoom(room);
 	}
 
-	@DeleteMapping
+	@DeleteMapping(value = "/room")
 	public boolean deleteRoom(@RequestBody Room room) {
 		return roomService.deleteRoom(room);
 	}
@@ -50,7 +50,7 @@ public class RoomController {
 		return roomService.deleteRoomById(id);
 	}
 
-	@DeleteMapping
+	@DeleteMapping(value = "/all")
 	public void deleteAll() {
 		roomService.deleteAll();
 	}
