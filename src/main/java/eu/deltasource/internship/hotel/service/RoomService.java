@@ -66,9 +66,6 @@ public class RoomService {
 	 * Deletes all rooms
 	 */
 	public void deleteAll() {
-		if (roomRepository.count() == 0) {
-			throw new ItemNotFoundException("Empty list of rooms can not be deleted!");
-		}
 		roomRepository.deleteAll();
 	}
 

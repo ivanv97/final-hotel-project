@@ -68,9 +68,6 @@ public class GuestService {
 	 * Deletes all guests
 	 */
 	public void deleteAll() {
-		if (guestRepository.count() == 0) {
-			throw new ItemNotFoundException("Empty list of guests can not be deleted!");
-		}
 		guestRepository.deleteAll();
 	}
 

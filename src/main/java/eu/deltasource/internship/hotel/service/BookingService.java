@@ -117,9 +117,6 @@ public class BookingService {
 	 * @return list of all bookings
 	 */
 	public List<Booking> findAll() {
-		if (bookingRepository.count() == 0) {
-			throw new ItemNotFoundException("Empty list of bookings!");
-		}
 		return bookingRepository.findAll();
 	}
 
