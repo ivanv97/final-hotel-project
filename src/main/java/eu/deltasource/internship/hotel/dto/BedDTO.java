@@ -10,10 +10,6 @@ public class BedDTO extends AbstractCommodityDTO {
 
 	private BedType bedType;
 
-	public BedDTO(BedType bedType) {
-		this.bedType = bedType;
-	}
-
 	public BedType getBedType() {
 		return bedType;
 	}
