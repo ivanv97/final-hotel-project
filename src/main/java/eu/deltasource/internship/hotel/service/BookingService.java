@@ -227,13 +227,9 @@ public class BookingService {
 					(from.isBefore(book.getFrom()) && (to.isBefore(book.getFrom()))))) {
 					continue;
 				}
-				if ((book.getFrom().equals(from) || book.getTo().equals(to)) ||
-
-					(from.isBefore(book.getFrom()) && to.isAfter(book.getTo())) ||
-
-					(from.isAfter(book.getFrom()) && to.isBefore(book.getTo())) ||
-
-					(to.isBefore(book.getTo()))) {
+				if (!to.isAfter(book.getFrom()) || !from.isBefore(book.getTo())) {
+					continue;
+				} else {
 					throw new BookingOverlappingException("The booking can not be created because dates are overlapped!");
 				}
 			}
