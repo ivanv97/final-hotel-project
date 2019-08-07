@@ -13,6 +13,9 @@ public class RoomDTO {
 		this.commodities = new HashSet<>(commodities);
 	}
 
+	public RoomDTO() {
+	}
+
 	public Set<AbstractCommodityDTO> getCommodities() {
 		return commodities;
 	}

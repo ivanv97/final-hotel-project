@@ -1,4 +1,4 @@
-package eu.deltasource.internship.hotel.controller;
+package eu.deltasource.internship.hotel.utility;
 
 
 import eu.deltasource.internship.hotel.exception.FailedInitializationException;

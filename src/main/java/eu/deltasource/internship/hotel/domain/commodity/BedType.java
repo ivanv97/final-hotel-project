@@ -1,5 +1,6 @@
 package eu.deltasource.internship.hotel.domain.commodity;
 
+import com.fasterxml.jackson.annotation.JsonValue;
 import lombok.Getter;
 
 /**
@@ -14,4 +15,9 @@ public enum BedType {
     BedType(int size) {
         this.size = size;
     }
+
+    @JsonValue
+	public int getSize() {
+		return size;
+	}
 }

@@ -3,6 +3,7 @@ package eu.deltasource.internship.hotel.controller;
 
 import eu.deltasource.internship.hotel.domain.Booking;
 import eu.deltasource.internship.hotel.service.BookingService;
+import eu.deltasource.internship.hotel.utility.Date;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import org.springframework.web.bind.annotation.*;
