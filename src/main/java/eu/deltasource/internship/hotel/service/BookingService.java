@@ -71,7 +71,7 @@ public class BookingService {
 	 */
 	public void saveAll(List<Booking> items) {
 		for (Booking item : items) {
-			bookingRepository.save(item);
+			save(item);
 		}
 	}
 
@@ -164,15 +164,13 @@ public class BookingService {
 		if (booking.getGuestId() != findById(bookingId).getGuestId()) {
 			throw new FailedInitializationException("You are not allowed to change guest id!");
 		}
-		if (!validateBookingUpdateDates(booking.getFrom(), booking.getTo(), booking.getRoomId(), bookingId, bookingId)) {
+		if (!validateBookingUpdateDates(booking.getFrom(), booking.getTo(), booking.getRoomId(), bookingId)) {
 			throw new BookingOverlappingException("The room is already booked for this period!");
 		}
 	}
 
 	private boolean validateBookingUpdateDates(LocalDate from, LocalDate to, int roomId, int bookingId, int... idToIgnore) {
-		if (findAll().isEmpty()) {
-			return true;
-		}
+
 		for (Booking booking : findAll()) {
 			if (booking.getRoomId() == roomId) {
 				if (idToIgnore.length > 0 && booking.getBookingId() == idToIgnore[0]) {
