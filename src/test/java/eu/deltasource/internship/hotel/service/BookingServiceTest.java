@@ -62,7 +62,7 @@ public class BookingServiceTest {
 		Room singleRoom = new Room(2, singleSet);
 		Room kingSizeRoom = new Room(3, kingSizeSet);
 
-		// adds the rooms to the repository which then can be accessed from  RoomService
+		// adds the rooms dto the repository which then can be accessed from  RoomService
 		roomService.saveRooms(doubleRoom, singleRoom, kingSizeRoom);
 
 		LocalDate firstFrom = LocalDate.of(2019, 8, 15);
@@ -73,7 +73,7 @@ public class BookingServiceTest {
 		LocalDate secondTo = LocalDate.of(2019, 9, 21);
 		secondBooking = new Booking(2, 2, 2, 1, secondFrom, secondTo);
 
-		// adds the bookings to the repository which then can be accessed from BookingService
+		// adds the bookings dto the repository which then can be accessed from BookingService
 		bookingService.saveAll(firstBooking, secondBooking);
 	}
 
@@ -276,7 +276,7 @@ public class BookingServiceTest {
 	@Test
 	public void updateBookingByExistingRoomId() {
 		//given
-		// from double to king size
+		// from double dto king size
 		int numberOfPeople = 2, roomId = 3, bookingId = 1, guestId = 1;
 		LocalDate from = LocalDate.of(2019, 8, 15);
 		LocalDate to = LocalDate.of(2019, 8, 18);

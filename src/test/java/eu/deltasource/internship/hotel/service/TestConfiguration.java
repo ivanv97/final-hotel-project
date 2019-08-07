@@ -37,7 +37,7 @@ public class TestConfiguration {
 
 		Hotel hotel = new Hotel(bookingService, guestService, roomService);
 
-		// Filling up hotel with ready rooms to use
+		// Filling up hotel with ready rooms dto use
 
         // Commodities for a double room
         AbstractCommodity doubleBed = new Bed(BedType.DOUBLE);
@@ -68,7 +68,7 @@ public class TestConfiguration {
 		Room fourPersonRoom = new Room(1, fourPersonSet);
 		Room fivePersonRoom = new Room(1, fivePersonSet);
 
-		// adds the rooms to the repository, which then can be accesses from the RoomService
+		// adds the rooms dto the repository, which then can be accesses from the RoomService
 		//roomService.saveRooms(Arrays.asList(doubleRoom, singleRoom, kingSizeRoom, threePeopleKingSizeRoom, fourPersonRoom, fivePersonRoom));
 
 	}

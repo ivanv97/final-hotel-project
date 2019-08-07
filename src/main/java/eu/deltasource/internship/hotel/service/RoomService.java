@@ -1,15 +1,26 @@
 package eu.deltasource.internship.hotel.service;
 
 import eu.deltasource.internship.hotel.domain.Room;
+import eu.deltasource.internship.hotel.domain.commodity.AbstractCommodity;
+import eu.deltasource.internship.hotel.domain.commodity.Bed;
+import eu.deltasource.internship.hotel.domain.commodity.Shower;
+import eu.deltasource.internship.hotel.domain.commodity.Toilet;
+import eu.deltasource.internship.hotel.dto.AbstractCommodityDTO;
+import eu.deltasource.internship.hotel.dto.BedDTO;
+import eu.deltasource.internship.hotel.dto.ToiletDTO;
 import eu.deltasource.internship.hotel.exception.FailedInitializationException;
 import eu.deltasource.internship.hotel.exception.ArgumentNotValidException;
 import eu.deltasource.internship.hotel.exception.ItemNotFoundException;
 import eu.deltasource.internship.hotel.repository.RoomRepository;
 
+import eu.deltasource.internship.hotel.dto.RoomDTO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 /**
  * Service class for the
@@ -130,6 +141,29 @@ public class RoomService {
 	 */
 	public void deleteAll() {
 		roomRepository.deleteAll();
+	}
+
+	public List<Room> convertDTO(List<RoomDTO> roomsDTO) {
+		List<Room> rooms = new ArrayList<>();
+		for (RoomDTO room : roomsDTO) {
+			rooms.add(convertDTO(room));
+		}
+		return rooms;
+	}
+
+	public Room convertDTO(RoomDTO room) {
+		Set<AbstractCommodity> roomCommodities = new HashSet<>();
+		for (AbstractCommodityDTO commodityDTO : room.getCommodities()) {
+			if (commodityDTO instanceof BedDTO) {
+				Bed bed = new Bed(((BedDTO) commodityDTO).getBedType());
+				roomCommodities.add(bed);
+			} else if (commodityDTO instanceof ToiletDTO) {
+				roomCommodities.add(new Toilet());
+			} else {
+				roomCommodities.add(new Shower());
+			}
+		}
+		return new Room(1, roomCommodities);
 	}
 
 	private void validateRoomList(Room... rooms) {

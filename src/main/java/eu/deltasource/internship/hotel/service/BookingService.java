@@ -41,7 +41,7 @@ public class BookingService {
 	/**
 	 * Gets a booking by its ID
 	 *
-	 * @param id to be searched by
+	 * @param id dto be searched by
 	 * @return Booking object that matches the given id
 	 * @throws ItemNotFoundException If the Id doesn't exist in the database
 	 */
@@ -67,7 +67,7 @@ public class BookingService {
 	 * Saves a list of booking objects
 	 * Checks each one separately beforehand
 	 *
-	 * @param items The list we want to save
+	 * @param items The list we want dto save
 	 */
 	public void saveAll(List<Booking> items) {
 		for (Booking item : items) {
@@ -91,7 +91,7 @@ public class BookingService {
 	 *
 	 * @param bookingId  id of the booking that will be updated
 	 * @param newBooking the new booking
-	 * @throws ItemNotFoundException if the booking we wish to update
+	 * @throws ItemNotFoundException if the booking we wish dto update
 	 *                               doesn't match any existing ones
 	 */
 	public void updateBooking(int bookingId, Booking newBooking) {
@@ -162,7 +162,7 @@ public class BookingService {
 
 	private void validateUpdateBooking(Booking booking, int bookingId) {
 		if (booking.getGuestId() != findById(bookingId).getGuestId()) {
-			throw new FailedInitializationException("You are not allowed to change guest id!");
+			throw new FailedInitializationException("You are not allowed dto change guest id!");
 		}
 		if (!validateBookingUpdateDates(booking.getFrom(), booking.getTo(), booking.getRoomId(), bookingId)) {
 			throw new BookingOverlappingException("The room is already booked for this period!");

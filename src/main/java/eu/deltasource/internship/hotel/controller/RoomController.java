@@ -2,8 +2,8 @@ package eu.deltasource.internship.hotel.controller;
 
 import eu.deltasource.internship.hotel.domain.Room;
 import eu.deltasource.internship.hotel.service.RoomService;
+import eu.deltasource.internship.hotel.dto.RoomDTO;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -16,13 +16,13 @@ public class RoomController {
 	private RoomService roomService;
 
 	@PostMapping
-	public void saveRoom(@RequestBody Room room) {
-		roomService.saveRoom(room);
+	public void saveRoom(@RequestBody RoomDTO room) {
+		roomService.saveRoom(roomService.convertDTO(room));
 	}
 
 	@PostMapping(value = "/multiple")
-	public void saveRooms(@RequestBody List<Room> rooms) {
-		roomService.saveRooms(rooms);
+	public void saveRooms(@RequestBody List<RoomDTO> rooms) {
+		roomService.saveRooms(roomService.convertDTO(rooms));
 	}
 
 	@GetMapping(value = "/{id}")
@@ -36,13 +36,13 @@ public class RoomController {
 	}
 
 	@PutMapping
-	public Room updateRoom(@RequestBody Room room) {
-		return roomService.updateRoom(room);
+	public Room updateRoom(@RequestBody RoomDTO room) {
+		return roomService.updateRoom(roomService.convertDTO(room));
 	}
 
 	@DeleteMapping(value = "/room")
-	public boolean deleteRoom(@RequestBody Room room) {
-		return roomService.deleteRoom(room);
+	public boolean deleteRoom(@RequestBody RoomDTO room) {
+		return roomService.deleteRoom(roomService.convertDTO(room));
 	}
 
 	@DeleteMapping(value = "/{id}")

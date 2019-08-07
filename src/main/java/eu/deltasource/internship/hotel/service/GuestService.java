@@ -44,7 +44,7 @@ public class GuestService {
 	}
 
 	/**
-	 * Tries to find a guest with given ID
+	 * Tries dto find a guest with given ID
 	 * returns the Guest object if found
 	 *
 	 * @param id id of the guest

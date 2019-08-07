@@ -7,7 +7,6 @@ import eu.deltasource.internship.hotel.domain.commodity.Bed;
 import eu.deltasource.internship.hotel.exception.FailedInitializationException;
 
 import lombok.Getter;
-import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.Collections;
 import java.util.HashSet;
@@ -16,16 +15,15 @@ import java.util.Set;
 /**
  * Represents a hotel room
  */
+@Getter
 public class Room {
 
 	private static final int EMPTY_ROOM = 0;
 
-	@Getter
 	private int roomId;
-	@Getter
 	private int roomCapacity;
-	@Autowired
 	private final Set<AbstractCommodity> commodities;
+
 
 	public Room(int roomId, Set<AbstractCommodity> commodities) {
 		this.roomId = roomId;
