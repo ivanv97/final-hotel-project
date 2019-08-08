@@ -3,9 +3,6 @@ package eu.deltasource.internship.hotel.dto;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
-import eu.deltasource.internship.hotel.domain.commodity.Bed;
-import eu.deltasource.internship.hotel.domain.commodity.Shower;
-import eu.deltasource.internship.hotel.domain.commodity.Toilet;
 
 /**
  * Transfer object for commodities

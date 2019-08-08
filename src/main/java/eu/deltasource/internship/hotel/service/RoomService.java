@@ -147,7 +147,7 @@ public class RoomService {
 	 * Converts DTO object to model
 	 *
 	 * @param roomsDTO list of DTO objects
-	 * @return list of POJO objects
+	 * @return list of model objects
 	 */
 	public List<Room> convertDTO(List<RoomDTO> roomsDTO) {
 		List<Room> rooms = new ArrayList<>();
@@ -161,7 +161,7 @@ public class RoomService {
 	 * Converst DTO object to model
 	 *
 	 * @param room DTO object
-	 * @return POJO object
+	 * @return model object
 	 */
 	public Room convertDTO(RoomDTO room) {
 		int roomId = room.getRoomId();
