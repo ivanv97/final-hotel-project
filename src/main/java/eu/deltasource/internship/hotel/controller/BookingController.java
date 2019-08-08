@@ -23,7 +23,7 @@ public class BookingController {
 	}
 
 	@PostMapping(value = "/multiple")
-	public void saveAll(List<Booking> bookings) {
+	public void saveAll(@RequestBody List<Booking> bookings) {
 		bookingService.saveAll(bookings);
 	}
 

@@ -164,7 +164,7 @@ public class RoomService {
 	 * @return POJO object
 	 */
 	public Room convertDTO(RoomDTO room) {
-		int roomId = 1;
+		int roomId = room.getRoomId();
 		Set<AbstractCommodity> roomCommodities = new HashSet<>();
 		for (AbstractCommodityDTO commodityDTO : room.getCommodities()) {
 			if (commodityDTO instanceof BedDTO) {
