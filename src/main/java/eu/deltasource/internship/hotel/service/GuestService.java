@@ -44,14 +44,13 @@ public class GuestService {
 	}
 
 	/**
-	 * Tries dto find a guest with given ID
+	 * Tries to find a guest with given ID
 	 * returns the Guest object if found
 	 *
 	 * @param id id of the guest
 	 * @return Guest object if one is found
-	 * @throws ItemNotFoundException if a guest with
-	 *                               the specified ID is not found
-	 */
+	 * @throws ItemNotFoundException if a guest with the specified ID is not found
+	 **/
 	public Guest findById(int id) {
 		if (!guestRepository.existsById(id)) {
 			throw new ItemNotFoundException("User does not exist");
@@ -63,8 +62,7 @@ public class GuestService {
 	 * Creates new guest
 	 *
 	 * @param item the new guest
-	 * @throws ArgumentNotValidException if the guest has invalid fields
-	 *                                   or is null
+	 * @throws ArgumentNotValidException if the guest has invalid fields or is null
 	 */
 	public void save(Guest item) {
 		validateGuest(item);
