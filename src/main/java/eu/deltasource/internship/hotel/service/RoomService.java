@@ -56,8 +56,7 @@ public class RoomService {
 	 *
 	 * @param id room's id
 	 * @return copy of the found room
-	 * @throws ItemNotFoundException if no room with the given
-	 *                               id exists
+	 * @throws ItemNotFoundException if no room with the given id exists
 	 */
 	public Room getRoomById(int id) {
 		if (roomRepository.existsById(id)) {
