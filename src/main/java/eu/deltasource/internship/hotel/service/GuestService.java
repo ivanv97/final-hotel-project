@@ -101,6 +101,7 @@ public class GuestService {
 	 */
 	public Guest updateGuest(Guest guest) {
 		validateGuest(guest);
+		findById(guest.getGuestId());
 		return guestRepository.updateGuest(guest);
 	}
 

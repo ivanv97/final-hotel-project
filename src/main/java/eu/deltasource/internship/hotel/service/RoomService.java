@@ -143,6 +143,12 @@ public class RoomService {
 		roomRepository.deleteAll();
 	}
 
+	/**
+	 * Converts DTO object to model
+	 *
+	 * @param roomsDTO list of DTO objects
+	 * @return list of POJO objects
+	 */
 	public List<Room> convertDTO(List<RoomDTO> roomsDTO) {
 		List<Room> rooms = new ArrayList<>();
 		for (RoomDTO room : roomsDTO) {
@@ -151,7 +157,14 @@ public class RoomService {
 		return rooms;
 	}
 
+	/**
+	 * Converst DTO object to model
+	 *
+	 * @param room DTO object
+	 * @return POJO object
+	 */
 	public Room convertDTO(RoomDTO room) {
+		int roomId = 1;
 		Set<AbstractCommodity> roomCommodities = new HashSet<>();
 		for (AbstractCommodityDTO commodityDTO : room.getCommodities()) {
 			if (commodityDTO instanceof BedDTO) {
@@ -163,7 +176,7 @@ public class RoomService {
 				roomCommodities.add(new Shower());
 			}
 		}
-		return new Room(1, roomCommodities);
+		return new Room(roomId, roomCommodities);
 	}
 
 	private void validateRoomList(Room... rooms) {

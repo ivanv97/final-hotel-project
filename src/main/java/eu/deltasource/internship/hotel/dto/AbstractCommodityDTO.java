@@ -13,10 +13,10 @@ import eu.deltasource.internship.hotel.domain.commodity.Toilet;
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.PROPERTY)
 @JsonSubTypes({
-	@JsonSubTypes.Type(value = Bed.class, name = "Bed"),
+	@JsonSubTypes.Type(value = BedDTO.class, name = "Bed"),
 
-	@JsonSubTypes.Type(value = Toilet.class, name = "Toilet"),
-	@JsonSubTypes.Type(value = Shower.class, name = "Shower")})
+	@JsonSubTypes.Type(value = ToiletDTO.class, name = "Toilet"),
+	@JsonSubTypes.Type(value = ShowerDTO.class, name = "Shower")})
 public class AbstractCommodityDTO {
 
 	public AbstractCommodityDTO() {

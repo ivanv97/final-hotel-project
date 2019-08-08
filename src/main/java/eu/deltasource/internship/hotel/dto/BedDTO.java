@@ -5,7 +5,6 @@ import eu.deltasource.internship.hotel.domain.commodity.BedType;
 /**
  * Transfer object for bed
  */
-
 public class BedDTO extends AbstractCommodityDTO {
 
 	private BedType bedType;
