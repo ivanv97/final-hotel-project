@@ -216,10 +216,6 @@ public class BookingService {
 	}
 
 	private void validateBookingCreationDates(LocalDate from, LocalDate to, int roomId) {
-		if (bookingRepository.count() == 0) {
-			return;
-		}
-
 		for (Booking book : findAll()) {
 			if (book.getRoomId() == roomId) {
 				if ((from.isBefore(book.getFrom()) && to.equals(book.getFrom()) ||
