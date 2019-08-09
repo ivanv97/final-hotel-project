@@ -66,7 +66,6 @@ public class BookingService {
 
 	/**
 	 * Saves a list of booking objects
-	 * Checks each one separately beforehand
 	 *
 	 * @param bookings The list we want dto save
 	 */
