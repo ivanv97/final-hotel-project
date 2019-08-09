@@ -18,13 +18,13 @@ public class BookingController {
 	private BookingService bookingService;
 
 	@PostMapping
-	public void save(@RequestBody Booking newBooking) {
-		bookingService.save(newBooking);
+	public Booking save(@RequestBody Booking booking) {
+		return bookingService.save(booking);
 	}
 
-	@PostMapping(value = "/multiple")
-	public void saveAll(@RequestBody List<Booking> bookings) {
-		bookingService.saveAll(bookings);
+	@PostMapping(value = "/list")
+	public List<Booking> saveAll(@RequestBody List<Booking> bookings) {
+		return bookingService.saveAll(bookings);
 	}
 
 	@GetMapping
@@ -37,12 +37,12 @@ public class BookingController {
 		return bookingService.findById(id);
 	}
 
-	@PutMapping(value = "/{id}/dates")
+	@PutMapping(value = "/dates/{id}")
 	public void updateBookingByDates(@PathVariable("id") int bookingId, @RequestBody Date dates) {
 		bookingService.updateBookingByDates(bookingId, dates.getFrom(), dates.getTo());
 	}
 
-	@PutMapping(value = "/{id}/room")
+	@PutMapping(value = "/room/{id}")
 	public void updateBooking(@PathVariable("id") int bookingId, @RequestBody Booking updatedBooking) {
 		bookingService.updateBooking(bookingId, updatedBooking);
 	}

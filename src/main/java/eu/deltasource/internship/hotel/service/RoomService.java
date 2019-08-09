@@ -8,7 +8,6 @@ import eu.deltasource.internship.hotel.domain.commodity.Toilet;
 import eu.deltasource.internship.hotel.dto.AbstractCommodityDTO;
 import eu.deltasource.internship.hotel.dto.BedDTO;
 import eu.deltasource.internship.hotel.dto.ToiletDTO;
-import eu.deltasource.internship.hotel.exception.FailedInitializationException;
 import eu.deltasource.internship.hotel.exception.ArgumentNotValidException;
 import eu.deltasource.internship.hotel.exception.ItemNotFoundException;
 import eu.deltasource.internship.hotel.repository.RoomRepository;
@@ -44,8 +43,7 @@ public class RoomService {
 	}
 
 	/**
-	 * Returns a list of all the rooms
-	 * if no rooms yet - empty list
+	 * Returns a list of all the rooms - if there are any
 	 */
 	public List<Room> findRooms() {
 		return roomRepository.findAll();
@@ -56,7 +54,6 @@ public class RoomService {
 	 *
 	 * @param id room's id
 	 * @return copy of the found room
-	 * @throws ItemNotFoundException if no room with the given id exists
 	 */
 	public Room getRoomById(int id) {
 		if (roomRepository.existsById(id)) {
@@ -67,36 +64,38 @@ public class RoomService {
 
 	/**
 	 * Creates a new room
-	 * while validating it first
 	 *
 	 * @param room the new room
 	 * @return the new room
 	 */
-	public void saveRoom(Room room) {
+	public Room saveRoom(Room room) {
 		validateRoom(room);
 		roomRepository.save(room);
+		return getRoomById(roomRepository.count());
 	}
 
 	/**
-	 * Creates array of rooms
+	 * Creates multiple rooms
 	 *
 	 * @param rooms array of rooms
+	 * @return the new rooms
 	 */
-	public void saveRooms(Room... rooms) {
+	public List<Room> saveRooms(Room... rooms) {
 		validateRoomList(rooms);
 		roomRepository.saveAll(rooms);
+		return findRooms();
 	}
 
 	/**
-	 * Saves all the rooms
-	 * in the passed list of rooms
+	 * Creates all the rooms in the passed list of rooms
 	 *
 	 * @param rooms
-	 * @throws ArgumentNotValidException When the list that is passed is null
+	 * @return list of the new created rooms
 	 */
-	public void saveRooms(List<Room> rooms) {
+	public List<Room> saveRooms(List<Room> rooms) {
 		validateRoomList(rooms.toArray(new Room[rooms.size()]));
 		roomRepository.saveAll(rooms);
+		return findRooms();
 	}
 
 	/**
@@ -127,8 +126,8 @@ public class RoomService {
 	/**
 	 * Deletes room
 	 *
-	 * @param room the room that will be deleted/removed
-	 * @return true if the room was successfully deleted/removed
+	 * @param room the room that will be deleted
+	 * @return true if the room was successfully deleted
 	 */
 	public boolean deleteRoom(Room room) {
 		validateRoom(room);
@@ -157,12 +156,15 @@ public class RoomService {
 	}
 
 	/**
-	 * Converst DTO object to model
+	 * Converts DTO object to model
 	 *
 	 * @param room DTO object
 	 * @return model object
 	 */
 	public Room convertDTO(RoomDTO room) {
+		if (room == null || room.getCommodities() == null || room.getCommodities().contains(null)) {
+			throw new ArgumentNotValidException("Invalid room transfer object!");
+		}
 		int roomId = room.getRoomId();
 		Set<AbstractCommodity> roomCommodities = new HashSet<>();
 		for (AbstractCommodityDTO commodityDTO : room.getCommodities()) {
@@ -180,7 +182,7 @@ public class RoomService {
 
 	private void validateRoomList(Room... rooms) {
 		if (rooms == null) {
-			throw new FailedInitializationException("Invalid rooms !");
+			throw new ArgumentNotValidException("Invalid rooms !");
 		}
 		for (Room room : rooms) {
 			validateRoom(room);
@@ -190,7 +192,7 @@ public class RoomService {
 	private void validateRoom(Room room) {
 		if (room == null || room.getCommodities() == null
 			|| room.getCommodities().isEmpty() || room.getCommodities().contains(null)) {
-			throw new FailedInitializationException("Invalid room !");
+			throw new ArgumentNotValidException("Invalid room !");
 		}
 	}
 }

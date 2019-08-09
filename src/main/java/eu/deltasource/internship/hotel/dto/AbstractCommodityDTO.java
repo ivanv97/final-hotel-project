@@ -14,7 +14,7 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo;
 
 	@JsonSubTypes.Type(value = ToiletDTO.class, name = "Toilet"),
 	@JsonSubTypes.Type(value = ShowerDTO.class, name = "Shower")})
-public class AbstractCommodityDTO {
+public abstract class AbstractCommodityDTO {
 
 	public AbstractCommodityDTO() {
 	}

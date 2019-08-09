@@ -16,13 +16,13 @@ public class RoomController {
 	private RoomService roomService;
 
 	@PostMapping
-	public void saveRoom(@RequestBody RoomDTO room) {
-		roomService.saveRoom(roomService.convertDTO(room));
+	public Room saveRoom(@RequestBody RoomDTO room) {
+		return roomService.saveRoom(roomService.convertDTO(room));
 	}
 
-	@PostMapping(value = "/multiple")
-	public void saveRooms(@RequestBody List<RoomDTO> rooms) {
-		roomService.saveRooms(roomService.convertDTO(rooms));
+	@PostMapping(value = "/list")
+	public List<Room> saveRooms(@RequestBody List<RoomDTO> rooms) {
+		return roomService.saveRooms(roomService.convertDTO(rooms));
 	}
 
 	@GetMapping(value = "/{id}")
@@ -40,7 +40,7 @@ public class RoomController {
 		return roomService.updateRoom(roomService.convertDTO(room));
 	}
 
-	@DeleteMapping(value = "/room")
+	@DeleteMapping
 	public boolean deleteRoom(@RequestBody RoomDTO room) {
 		return roomService.deleteRoom(roomService.convertDTO(room));
 	}

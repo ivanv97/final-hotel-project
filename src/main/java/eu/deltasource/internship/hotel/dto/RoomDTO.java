@@ -3,6 +3,7 @@ package eu.deltasource.internship.hotel.dto;
 
 import lombok.Getter;
 
+import java.util.HashSet;
 import java.util.Set;
 
 /**
@@ -22,6 +23,6 @@ public class RoomDTO {
 	 */
 	public RoomDTO(int roomId, Set<AbstractCommodityDTO> commodities) {
 		this.roomId = roomId;
-		this.commodities = commodities;
+		this.commodities = new HashSet<>(commodities);
 	}
 }
