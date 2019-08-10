@@ -2,6 +2,7 @@ package eu.deltasource.internship.hotel.service;
 
 import eu.deltasource.internship.hotel.domain.Room;
 import eu.deltasource.internship.hotel.domain.commodity.*;
+import eu.deltasource.internship.hotel.exception.ArgumentNotValidException;
 import eu.deltasource.internship.hotel.exception.FailedInitializationException;
 import eu.deltasource.internship.hotel.exception.ItemNotFoundException;
 import eu.deltasource.internship.hotel.repository.RoomRepository;
@@ -107,7 +108,7 @@ public class RoomServiceTest {
 		//when and then
 		assertThrows(FailedInitializationException.class,
 			() -> roomService.saveRoom(new Room(roomId, doubleSet)));
-		assertThrows(FailedInitializationException.class,
+		assertThrows(ArgumentNotValidException.class,
 			() -> roomService.saveRoom((kingSizeRoom)));
 		assertThrows(FailedInitializationException.class,
 			() -> roomService.saveRoom(new Room(roomId, invalidSet)));
@@ -151,7 +152,7 @@ public class RoomServiceTest {
 		Room room = null;
 
 		//when and then
-		assertThrows(FailedInitializationException.class, () -> roomService.deleteRoom(room));
+		assertThrows(ArgumentNotValidException.class, () -> roomService.deleteRoom(room));
 	}
 
 	@Test
@@ -245,9 +246,9 @@ public class RoomServiceTest {
 		//invalid room id
 		assertThrows(ItemNotFoundException.class, () -> roomService.updateRoom(updatedRoom));
 		// room is null
-		assertThrows(FailedInitializationException.class, () -> roomService.updateRoom(newRoom));
+		assertThrows(ArgumentNotValidException.class, () -> roomService.updateRoom(newRoom));
 		// room with null commodity
-		assertThrows(FailedInitializationException.class, () -> roomService.updateRoom(updatedRoomHasNullCommodity));
+		assertThrows(ArgumentNotValidException.class, () -> roomService.updateRoom(updatedRoomHasNullCommodity));
 	}
 
 	@Test
@@ -261,9 +262,9 @@ public class RoomServiceTest {
 
 		// when and then
 		//rooms reference is null
-		assertThrows(FailedInitializationException.class, () -> roomService.saveRooms(rooms));
+		assertThrows(ArgumentNotValidException.class, () -> roomService.saveRooms(rooms));
 		//room is null
-		assertThrows(FailedInitializationException.class, () -> roomService.saveRooms(kingSizeRoom, invalidRoom));
+		assertThrows(ArgumentNotValidException.class, () -> roomService.saveRooms(kingSizeRoom, invalidRoom));
 	}
 
 	@Test

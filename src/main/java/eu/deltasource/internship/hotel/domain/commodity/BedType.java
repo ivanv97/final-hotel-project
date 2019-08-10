@@ -15,9 +15,4 @@ public enum BedType {
     BedType(int size) {
         this.size = size;
     }
-
-    @JsonValue
-	public int getSize() {
-		return size;
-	}
 }

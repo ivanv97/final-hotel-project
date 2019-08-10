@@ -3,6 +3,7 @@ package eu.deltasource.internship.hotel.service;
 
 import eu.deltasource.internship.hotel.domain.Gender;
 import eu.deltasource.internship.hotel.domain.Guest;
+import eu.deltasource.internship.hotel.exception.ArgumentNotValidException;
 import eu.deltasource.internship.hotel.exception.FailedInitializationException;
 import eu.deltasource.internship.hotel.exception.ItemNotFoundException;
 import eu.deltasource.internship.hotel.repository.GuestRepository;
@@ -76,7 +77,7 @@ public class GuestServiceTest {
 
 		//Then
 		assertThrows(ItemNotFoundException.class, () -> service.updateGuest(updatedGuest));
-		assertThrows(FailedInitializationException.class, () -> service.updateGuest(null));
+		assertThrows(ArgumentNotValidException.class, () -> service.updateGuest(null));
 	}
 
 	@Test
@@ -155,7 +156,7 @@ public class GuestServiceTest {
 
 	@Test
 	public void saveShouldThrowExceptionIfNullOrInvalidGuestPassed() {
-		assertThrows(FailedInitializationException.class, () -> service.save(null));
+		assertThrows(ArgumentNotValidException.class, () -> service.save(null));
 		assertThrows(FailedInitializationException.class, () -> service.save(new Guest(1, null, null, Gender.MALE)));
 	}
 

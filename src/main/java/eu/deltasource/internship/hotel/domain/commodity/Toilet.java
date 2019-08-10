@@ -13,5 +13,4 @@ public class Toilet extends AbstractCommodity {
     public void prepare() {
         System.out.println("The toilet is being cleaned!");
     }
-
 }

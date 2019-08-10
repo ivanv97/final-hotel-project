@@ -100,8 +100,11 @@ public class BookingService {
 		if (bookingRepository.existsById(bookingId)) {
 			validateBooking(newBooking);
 
-			int roomId = newBooking.getRoomId(), guestId = newBooking.getGuestId(), numOfPeople = newBooking.getNumberOfPeople();
-			LocalDate from = newBooking.getFrom(), to = newBooking.getTo();
+			int roomId = newBooking.getRoomId();
+			int guestId = newBooking.getGuestId();
+			int numOfPeople = newBooking.getNumberOfPeople();
+			LocalDate from = newBooking.getFrom();
+			LocalDate to = newBooking.getTo();
 
 			validateUpdateBooking(newBooking, bookingId);
 			deleteById(bookingId);
@@ -203,12 +206,9 @@ public class BookingService {
 
 		validateDates(from, to);
 
-		if (roomService.getRoomById(roomId).getRoomId() == roomId &&
+		return (roomService.getRoomById(roomId).getRoomId() == roomId &&
 			roomService.getRoomById(roomId).getRoomCapacity() >= numberOfPeople &&
-			guestService.findById(guestId).getGuestId() == guestId) {
-			return true;
-		}
-		return false;
+			guestService.findById(guestId).getGuestId() == guestId);
 	}
 
 	private void validateDates(LocalDate from, LocalDate to) {

@@ -9,10 +9,10 @@ public abstract class AbstractCommodity {
 	@Getter
 	protected final int inventoryId;
 
-	private static int INVENTORY_COUNT;
+	private static int inventoryCount;
 
 	public AbstractCommodity() {
-		this.inventoryId = ++INVENTORY_COUNT;
+		this.inventoryId = ++inventoryCount;
 	}
 
 	public abstract void prepare();

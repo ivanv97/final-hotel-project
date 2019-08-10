@@ -1,8 +1,7 @@
 package eu.deltasource.internship.hotel.exception;
 
-import java.security.InvalidParameterException;
 
-public class ArgumentNotValidException extends InvalidParameterException {
+public class ArgumentNotValidException extends RuntimeException {
 	public ArgumentNotValidException() {
 	}
 

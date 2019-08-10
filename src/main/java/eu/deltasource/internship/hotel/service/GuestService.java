@@ -1,6 +1,6 @@
 package eu.deltasource.internship.hotel.service;
 
-import com.sun.jdi.connect.Connector;
+
 import eu.deltasource.internship.hotel.domain.Guest;
 
 import eu.deltasource.internship.hotel.exception.ArgumentNotValidException;
