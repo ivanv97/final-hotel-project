@@ -17,12 +17,12 @@ public class RoomController {
 
 	@PostMapping
 	public Room saveRoom(@RequestBody RoomDTO room) {
-		return roomService.saveRoom(roomService.convertDTO(room));
+		return roomService.saveRoom(roomService.convertDTORoomToModel(room));
 	}
 
 	@PostMapping(value = "/list")
 	public List<Room> saveRooms(@RequestBody List<RoomDTO> rooms) {
-		return roomService.saveRooms(roomService.convertDTO(rooms));
+		return roomService.saveRooms(roomService.convertDTORoomsToModel(rooms));
 	}
 
 	@GetMapping(value = "/{id}")
@@ -37,12 +37,12 @@ public class RoomController {
 
 	@PutMapping
 	public Room updateRoom(@RequestBody RoomDTO room) {
-		return roomService.updateRoom(roomService.convertDTO(room));
+		return roomService.updateRoom(roomService.convertDTORoomToModel(room));
 	}
 
 	@DeleteMapping
 	public boolean deleteRoom(@RequestBody RoomDTO room) {
-		return roomService.deleteRoom(roomService.convertDTO(room));
+		return roomService.deleteRoom(roomService.convertDTORoomToModel(room));
 	}
 
 	@DeleteMapping(value = "/{id}")

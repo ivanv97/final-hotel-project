@@ -51,15 +51,16 @@ public class RoomService {
 
 	/**
 	 * Searches room by id
+	 * and returns one if id is valid
 	 *
 	 * @param id room's id
 	 * @return copy of the found room
 	 */
 	public Room getRoomById(int id) {
-		if (roomRepository.existsById(id)) {
-			return roomRepository.findById(id);
+		if (!roomRepository.existsById(id)) {
+			throw new ItemNotFoundException("Room with id " + id + " does not exist!");
 		}
-		throw new ItemNotFoundException("Room with id " + id + " does not exist!");
+		return roomRepository.findById(id);
 	}
 
 	/**
@@ -93,9 +94,7 @@ public class RoomService {
 	 * @return list of the new created rooms
 	 */
 	public List<Room> saveRooms(List<Room> rooms) {
-		validateRoomList(rooms.toArray(new Room[rooms.size()]));
-		roomRepository.saveAll(rooms);
-		return findRooms();
+		return saveRooms(rooms.toArray(new Room[rooms.size()]));
 	}
 
 	/**
@@ -106,7 +105,9 @@ public class RoomService {
 	 */
 	public Room updateRoom(Room room) {
 		validateRoom(room);
-		getRoomById(room.getRoomId());
+		if (!roomRepository.existsById(room.getRoomId())) {
+			throw new ItemNotFoundException("Room with " + " does not exist!");
+		}
 		return roomRepository.updateRoom(room);
 	}
 
@@ -117,57 +118,64 @@ public class RoomService {
 	 * @return true if the room is successfully deleted/removed
 	 */
 	public boolean deleteRoomById(int id) {
-		if (roomRepository.existsById(id)) {
-			return roomRepository.deleteById(id);
+		if (!roomRepository.existsById(id)) {
+			throw new ItemNotFoundException("Room with id " + id + " does not exist!");
 		}
-		throw new ItemNotFoundException("Room with id " + id + " does not exist!");
+		return roomRepository.deleteById(id);
 	}
 
 	/**
-	 * Deletes room
+	 * Deletes the room with
+	 * matching id
 	 *
 	 * @param room the room that will be deleted
 	 * @return true if the room was successfully deleted
 	 */
 	public boolean deleteRoom(Room room) {
 		validateRoom(room);
+		if (!roomRepository.existsById(room.getRoomId())) {
+			throw new ItemNotFoundException("Cannot delete non-existing room!");
+		}
 		return roomRepository.delete(getRoomById(room.getRoomId()));
 	}
 
 	/**
-	 * Deletes all rooms
+	 * Deletes all rooms in repository
 	 */
 	public void deleteAll() {
 		roomRepository.deleteAll();
 	}
 
 	/**
-	 * Converts DTO object to model
+	 * Converts multiple room DTO objects
+	 * to model objects
 	 *
 	 * @param roomsDTO list of DTO objects
 	 * @return list of model objects
 	 */
-	public List<Room> convertDTO(List<RoomDTO> roomsDTO) {
+	public List<Room> convertDTORoomsToModel(List<RoomDTO> roomsDTO) {
 		List<Room> rooms = new ArrayList<>();
 		for (RoomDTO room : roomsDTO) {
-			rooms.add(convertDTO(room));
+			rooms.add(convertDTORoomToModel(room));
 		}
 		return rooms;
 	}
 
 	/**
-	 * Converts DTO object to model
+	 * Converts single DTO roomDTO object
+	 * to ordinary model object
 	 *
-	 * @param room DTO object
+	 * @param roomDTO DTO object
 	 * @return model object
 	 */
-	public Room convertDTO(RoomDTO room) {
-		if (room == null || room.getCommodities() == null || room.getCommodities().contains(null)) {
-			throw new ArgumentNotValidException("Invalid room transfer object!");
+	public Room convertDTORoomToModel(RoomDTO roomDTO) {
+		if (roomDTO == null || roomDTO.getCommodities() == null
+			|| roomDTO.getCommodities().contains(null)) {
+			throw new ArgumentNotValidException("Invalid roomDTO transfer object!");
 		}
-		int roomId = room.getRoomId();
+		int roomId = roomDTO.getRoomId();
 		Set<AbstractCommodity> roomCommodities = new HashSet<>();
-		for (AbstractCommodityDTO commodityDTO : room.getCommodities()) {
+		for (AbstractCommodityDTO commodityDTO : roomDTO.getCommodities()) {
 			if (commodityDTO instanceof BedDTO) {
 				Bed bed = new Bed(((BedDTO) commodityDTO).getBedType());
 				roomCommodities.add(bed);
@@ -191,8 +199,9 @@ public class RoomService {
 
 	private void validateRoom(Room room) {
 		if (room == null || room.getCommodities() == null
-			|| room.getCommodities().isEmpty() || room.getCommodities().contains(null)) {
-			throw new ArgumentNotValidException("Invalid room !");
+			|| room.getCommodities().isEmpty() || room.getCommodities().contains(null)
+			|| room.getRoomCapacity() <= 0) {
+			throw new ArgumentNotValidException("Invalid room!");
 		}
 	}
 }
