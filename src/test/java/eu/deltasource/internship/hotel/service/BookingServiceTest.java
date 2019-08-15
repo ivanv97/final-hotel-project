@@ -235,7 +235,6 @@ public class BookingServiceTest {
 		assertEquals(expectedSize, bookingService.findAll().size());
 		assertEquals(firstBooking, bookingService.findById(firstBookingId));
 		assertEquals(secondBooking, bookingService.findById(secondBookingId));
-
 	}
 
 	@Test

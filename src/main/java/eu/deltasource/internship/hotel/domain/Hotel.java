@@ -9,15 +9,18 @@ import eu.deltasource.internship.hotel.service.RoomService;
  */
 public class Hotel {
 
-	private final BookingService bookingService;
+    private final BookingService bookingService;
 
-	private final GuestService guestService;
+    private final GuestService guestService;
 
-	private final RoomService roomService;
+    private final RoomService roomService;
 
-	public Hotel(BookingService bookingService, GuestService guestService, RoomService roomService) {
-		this.bookingService = bookingService;
-		this.guestService = guestService;
-		this.roomService = roomService;
-	}
+    /**
+     * #thisIsAConstructor
+     */
+    public Hotel(BookingService bookingService, GuestService guestService, RoomService roomService) {
+        this.bookingService = bookingService;
+        this.guestService = guestService;
+        this.roomService = roomService;
+    }
 }
