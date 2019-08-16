@@ -1,9 +1,8 @@
 package eu.deltasource.internship.hotel.service;
 
-
 import eu.deltasource.internship.hotel.domain.Guest;
-
 import eu.deltasource.internship.hotel.exception.ArgumentNotValidException;
+import eu.deltasource.internship.hotel.exception.FailedInitializationException;
 import eu.deltasource.internship.hotel.exception.ItemNotFoundException;
 import eu.deltasource.internship.hotel.repository.GuestRepository;
 
@@ -35,7 +34,8 @@ public class GuestService {
 	}
 
 	/**
-	 * Gets a list of all the guests - if there are any
+	 * Gets a list of all the guests -
+	 * if there are any
 	 *
 	 * @return list of all the guests
 	 */
@@ -45,50 +45,52 @@ public class GuestService {
 
 	/**
 	 * Tries to find a guest with given ID
+	 * returns the Guest object if found
 	 *
 	 * @param id id of the guest
 	 * @return Guest object if one is found
+	 * @throws ItemNotFoundException if a guest with the specified ID is not found
 	 **/
 	public Guest findById(int id) {
-		if (guestRepository.existsById(id)) {
-			return guestRepository.findById(id);
+		if (!guestRepository.existsById(id)) {
+			throw new ItemNotFoundException("Guest does not exist");
 		}
-		throw new ItemNotFoundException("User does not exist");
+		return guestRepository.findById(id);
 	}
 
 	/**
 	 * Creates new guest
 	 *
 	 * @param item the new guest
+	 * @throws ArgumentNotValidException if the guest has invalid fields or is null
 	 */
-	public Guest save(Guest item) {
+	public void save(Guest item) {
 		validateGuest(item);
 		guestRepository.save(item);
-		return findById(guestRepository.count());
 	}
 
 	/**
-	 * Creates list of new guests
+	 * Saves all of the guests passed
+	 * as list to the repository by
+	 * calling the overloaded varargs
+	 * version of the method
 	 *
 	 * @param guests the list of new guests
-	 * @return list of all guests
 	 */
-	public List<Guest> saveAll(List<Guest> guests) {
-		validateGuestList(guests);
-		guestRepository.saveAll(guests);
-		return findAll();
+	public void saveAll(List<Guest> guests) {
+		saveAll(guests.toArray(new Guest[guests.size()]));
 	}
 
 	/**
-	 * Creates multiple guests
+	 * Saves multiple guests
+	 * Takes varargs and checks each arg
+	 * separately for validity
 	 *
 	 * @param items Guest varargs
-	 * @return list of all guests
 	 */
-	public List<Guest> saveAll(Guest... items) {
+	public void saveAll(Guest... items) {
 		validateGuestList(Arrays.asList(items));
 		guestRepository.saveAll(items);
-		return findAll();
 	}
 
 	/**
@@ -99,7 +101,9 @@ public class GuestService {
 	 */
 	public Guest updateGuest(Guest guest) {
 		validateGuest(guest);
-		findById(guest.getGuestId());
+		if(!guestRepository.existsById(guest.getGuestId())){
+			throw new ItemNotFoundException("Guest cannot be updated - does not exist.");
+		}
 		return guestRepository.updateGuest(guest);
 	}
 
@@ -110,10 +114,10 @@ public class GuestService {
 	 * @return true if the guest is successfully removed
 	 */
 	public boolean deleteById(int id) {
-		if (guestRepository.existsById(id)) {
-			return guestRepository.deleteById(id);
+		if (!guestRepository.existsById(id)) {
+			throw new ItemNotFoundException("Guest with id " + id + " does not exist!");
 		}
-		throw new ItemNotFoundException("Guest with id " + id + " does not exist!");
+		return guestRepository.deleteById(id);
 	}
 
 	/**
@@ -125,11 +129,14 @@ public class GuestService {
 	 */
 	public boolean deleteGuest(Guest guest) {
 		validateGuest(guest);
+		if (!guestRepository.existsById(guest.getGuestId())) {
+			throw new ItemNotFoundException("Guest with id " + guest.getGuestId() + " does not exist!");
+		}
 		return guestRepository.delete(findById(guest.getGuestId()));
 	}
 
 	/**
-	 * Deletes all existing guests
+	 * Deletes all guests
 	 */
 	public void deleteAll() {
 		guestRepository.deleteAll();
@@ -137,7 +144,7 @@ public class GuestService {
 
 	private void validateGuestList(List<Guest> guests) {
 		if (guests == null) {
-			throw new ArgumentNotValidException("Invalid list of guests!");
+			throw new FailedInitializationException("List of guests cannot be null!");
 		}
 		for (Guest guest : guests) {
 			validateGuest(guest);
@@ -146,12 +153,11 @@ public class GuestService {
 
 	private void validateGuest(Guest guest) {
 		if (guest == null) {
-			throw new ArgumentNotValidException("Invalid guest!");
+			throw new FailedInitializationException("Guest cannot be null!");
 		}
 		if (guest.getFirstName() == null || guest.getLastName() == null || guest.getGender() == null
 			|| guest.getFirstName().isEmpty() || guest.getLastName().isEmpty()) {
-			throw new ArgumentNotValidException("Invalid guest fields!");
-
+			throw new FailedInitializationException("Invalid guest fields!");
 		}
 	}
 }

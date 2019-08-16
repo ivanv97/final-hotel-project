@@ -40,7 +40,7 @@ public class Booking {
 
 	public void setBookingDates(LocalDate from, LocalDate to) {
 		try {
-			if (from.isAfter(to) || to.equals(from) || from.isBefore(LocalDate.now())) {
+			if (from.isAfter(to) || to.equals(from)) {
 				throw new FailedInitializationException("Invalid dates given!");
 			}
 			this.from = from;

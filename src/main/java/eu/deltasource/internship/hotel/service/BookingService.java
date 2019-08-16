@@ -1,9 +1,8 @@
 package eu.deltasource.internship.hotel.service;
 
-
 import eu.deltasource.internship.hotel.domain.Booking;
-import eu.deltasource.internship.hotel.exception.ArgumentNotValidException;
 import eu.deltasource.internship.hotel.exception.BookingOverlappingException;
+import eu.deltasource.internship.hotel.exception.FailedInitializationException;
 import eu.deltasource.internship.hotel.exception.ItemNotFoundException;
 import eu.deltasource.internship.hotel.repository.BookingRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,7 +31,8 @@ public class BookingService {
 	}
 
 	/**
-	 * Returns a list of all bookings for all rooms
+	 * Returns a list of
+	 * all bookings for all rooms
 	 */
 	public List<Booking> findAll() {
 		return bookingRepository.findAll();
@@ -46,46 +46,44 @@ public class BookingService {
 	 * @throws ItemNotFoundException If the Id doesn't exist in the database
 	 */
 	public Booking findById(int id) {
-		if (bookingRepository.existsById(id)) {
-			return bookingRepository.findById(id);
+		if (!bookingRepository.existsById(id)) {
+			throw new ItemNotFoundException("There are no bookings with that ID!");
 		}
-		throw new ItemNotFoundException("There are no bookings with that ID!");
+		return bookingRepository.findById(id);
 	}
 
 	/**
 	 * Creates new booking
 	 *
-	 * @param booking the new booking
+	 * @param newBooking the new booking
 	 */
-	public Booking save(Booking booking) {
-		validateBooking(booking);
-		validateBookingCreationDates(booking.getFrom(), booking.getTo(), booking.getRoomId());
-		bookingRepository.save(booking);
-		return findById(bookingRepository.count());
+	public void save(Booking newBooking) {
+		validateBooking(newBooking);
+		validateBookingCreationDates(newBooking.getFrom(), newBooking.getTo(), newBooking.getRoomId());
+		bookingRepository.save(newBooking);
 	}
 
 	/**
 	 * Saves a list of booking objects
+	 * Checks each one separately beforehand
 	 *
-	 * @param bookings The list we want dto save
+	 * @param items The list we want dto save
 	 */
-	public List<Booking> saveAll(List<Booking> bookings) {
-		for (Booking booking : bookings) {
-			save(booking);
+	public void saveAll(List<Booking> items) {
+		for (Booking item : items) {
+			save(item);
 		}
-		return findAll();
 	}
 
 	/**
-	 * Creates multiple bookings
+	 * Creates array of bookings
 	 *
 	 * @param bookings array of bookings
 	 */
-	public List<Booking> saveAll(Booking... bookings) {
+	public void saveAll(Booking... bookings) {
 		for (Booking booking : bookings) {
 			save(booking);
 		}
-		return findAll();
 	}
 
 	/**
@@ -100,11 +98,8 @@ public class BookingService {
 		if (bookingRepository.existsById(bookingId)) {
 			validateBooking(newBooking);
 
-			int roomId = newBooking.getRoomId();
-			int guestId = newBooking.getGuestId();
-			int numOfPeople = newBooking.getNumberOfPeople();
-			LocalDate from = newBooking.getFrom();
-			LocalDate to = newBooking.getTo();
+			int roomId = newBooking.getRoomId(), guestId = newBooking.getGuestId(), numOfPeople = newBooking.getNumberOfPeople();
+			LocalDate from = newBooking.getFrom(), to = newBooking.getTo();
 
 			validateUpdateBooking(newBooking, bookingId);
 			deleteById(bookingId);
@@ -158,7 +153,8 @@ public class BookingService {
 	}
 
 	/**
-	 * Deletes every single booking from the repo
+	 * Deletes every single booking
+	 * from the repo
 	 */
 	public void deleteAll() {
 		bookingRepository.deleteAll();
@@ -166,7 +162,7 @@ public class BookingService {
 
 	private void validateUpdateBooking(Booking booking, int bookingId) {
 		if (booking.getGuestId() != findById(bookingId).getGuestId()) {
-			throw new ArgumentNotValidException("You are not allowed dto change guest id!");
+			throw new FailedInitializationException("You are not allowed dto change guest id!");
 		}
 		if (!validateBookingUpdateDates(booking.getFrom(), booking.getTo(), booking.getRoomId(), bookingId)) {
 			throw new BookingOverlappingException("The room is already booked for this period!");
@@ -190,13 +186,12 @@ public class BookingService {
 			}
 		}
 		return true;
-
 	}
 
 
 	private void validateBooking(Booking booking) {
 		if (booking == null || !validateBookingFields(booking)) {
-			throw new ArgumentNotValidException("Invalid Booking!");
+			throw new FailedInitializationException("Invalid Booking!");
 		}
 	}
 
@@ -206,14 +201,17 @@ public class BookingService {
 
 		validateDates(from, to);
 
-		return (roomService.getRoomById(roomId).getRoomId() == roomId &&
+		if (roomService.getRoomById(roomId).getRoomId() == roomId &&
 			roomService.getRoomById(roomId).getRoomCapacity() >= numberOfPeople &&
-			guestService.findById(guestId).getGuestId() == guestId);
+			guestService.findById(guestId).getGuestId() == guestId) {
+			return true;
+		}
+		return false;
 	}
 
 	private void validateDates(LocalDate from, LocalDate to) {
-		if (from == null || to == null || from.isAfter(to) || from.equals(to) || from.isBefore(LocalDate.now())) {
-			throw new ArgumentNotValidException("Invalid dates!");
+		if (from == null || to == null || from.isAfter(to) || from.equals(to)) {
+			throw new FailedInitializationException("Invalid dates!");
 		}
 	}
 

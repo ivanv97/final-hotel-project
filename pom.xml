@@ -15,9 +15,6 @@
 	</parent>
 
 	<properties>
-		<maven.compiler.source>12</maven.compiler.source>
-		<maven.compiler.target>12</maven.compiler.target>
-		<java.version>12</java.version>
 		<junit-jupiter.version>5.4.2</junit-jupiter.version>
 		<hamcrest.version>2.1</hamcrest.version>
 		<surefire.version>2.22.0</surefire.version>
