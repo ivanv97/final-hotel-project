@@ -41,13 +41,7 @@ public class GuestServiceTest {
 
 	@Test
 	public void findByIdShouldThrowExceptionIfNoGuestWithSpecifiedId() {
-		//Given
-		int nonExistingId = guest.getGuestId() + 1;
-
-		//When
-
-		//Then
-		assertThrows(ItemNotFoundException.class, () -> service.findById(nonExistingId));
+		assertThrows(ItemNotFoundException.class, () -> service.findById(service.findAll().size() + 1));
 	}
 
 	@Test
@@ -200,5 +194,12 @@ public class GuestServiceTest {
 		//Then
 		assertThat("The list does not contain the expected number of elements", allGuests, hasSize(3));
 		assertThat("The list doesn't contain every element", allGuests, containsInAnyOrder(guest, newGuest, newGuest1));
+	}
+
+	@Test
+	public void saveAllShouldFailIfVarargsNotProper(){
+		//one of the guests is null
+		assertThrows(FailedInitializationException.class, () -> service.saveAll(
+			new Guest(2, "Georgi", "Tsankov", Gender.MALE), null));
 	}
 }

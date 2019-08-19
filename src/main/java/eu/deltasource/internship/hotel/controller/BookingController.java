@@ -42,9 +42,9 @@ public class BookingController {
 		bookingService.updateBookingByDates(bookingId, dates.getFrom(), dates.getTo());
 	}
 
-	@PutMapping(value = "/{id}/room")
-	public void updateBooking(@PathVariable("id") int bookingId, @RequestBody Booking updatedBooking) {
-		bookingService.updateBooking(bookingId, updatedBooking);
+	@PutMapping(value = "/room")
+	public void updateBooking(@RequestBody Booking updatedBooking) {
+		bookingService.updateBooking(updatedBooking);
 	}
 
 	@DeleteMapping(value = "/{id}")

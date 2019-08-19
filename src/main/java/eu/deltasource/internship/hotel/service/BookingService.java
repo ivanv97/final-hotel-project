@@ -8,6 +8,7 @@ import eu.deltasource.internship.hotel.repository.BookingRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.awt.print.Book;
 import java.time.LocalDate;
 import java.util.List;
 
@@ -67,12 +68,10 @@ public class BookingService {
 	 * Saves a list of booking objects
 	 * Checks each one separately beforehand
 	 *
-	 * @param items The list we want dto save
+	 * @param bookings The list we want dto save
 	 */
-	public void saveAll(List<Booking> items) {
-		for (Booking item : items) {
-			save(item);
-		}
+	public void saveAll(List<Booking> bookings) {
+		saveAll(bookings.toArray(new Booking[bookings.size()]));
 	}
 
 	/**
@@ -89,24 +88,19 @@ public class BookingService {
 	/**
 	 * Updates booking by either room id or number of people
 	 *
-	 * @param bookingId  id of the booking that will be updated
-	 * @param newBooking the new booking
-	 * @throws ItemNotFoundException if the booking we wish dto update
+	 * @param updatedBooking the new booking
+	 * @throws ItemNotFoundException if the booking we wish to update
 	 *                               doesn't match any existing ones
 	 */
-	public void updateBooking(int bookingId, Booking newBooking) {
-		if (bookingRepository.existsById(bookingId)) {
-			validateBooking(newBooking);
+	public void updateBooking(Booking updatedBooking) {
+		if (!bookingRepository.existsById(updatedBooking.getBookingId())) {
+			throw new ItemNotFoundException("Booking with id " + updatedBooking.getBookingId() + " does not exist!");
 
-			int roomId = newBooking.getRoomId(), guestId = newBooking.getGuestId(), numOfPeople = newBooking.getNumberOfPeople();
-			LocalDate from = newBooking.getFrom(), to = newBooking.getTo();
-
-			validateUpdateBooking(newBooking, bookingId);
-			deleteById(bookingId);
-			save(new Booking(bookingId, guestId, roomId, numOfPeople, from, to));
-		} else {
-			throw new ItemNotFoundException("Booking with id " + bookingId + " does not exist!");
 		}
+		validateBooking(updatedBooking);
+		validateUpdateBooking(updatedBooking);
+		deleteById(updatedBooking.getBookingId());
+		save(updatedBooking);
 	}
 
 	/**
@@ -146,10 +140,10 @@ public class BookingService {
 	 * @param id booking's id
 	 */
 	public boolean deleteById(int id) {
-		if (bookingRepository.existsById(id)) {
-			return bookingRepository.deleteById(id);
+		if (!bookingRepository.existsById(id)) {
+			throw new ItemNotFoundException("Booking with id " + id + " does not exist!");
 		}
-		throw new ItemNotFoundException("Booking with id " + id + " does not exist!");
+		return bookingRepository.deleteById(id);
 	}
 
 	/**
@@ -160,20 +154,19 @@ public class BookingService {
 		bookingRepository.deleteAll();
 	}
 
-	private void validateUpdateBooking(Booking booking, int bookingId) {
-		if (booking.getGuestId() != findById(bookingId).getGuestId()) {
-			throw new FailedInitializationException("You are not allowed dto change guest id!");
+	private void validateUpdateBooking(Booking booking) {
+		if (booking.getGuestId() != findById(booking.getBookingId()).getGuestId()) {
+			throw new FailedInitializationException("You are not allowed to change guest id!");
 		}
-		if (!validateBookingUpdateDates(booking.getFrom(), booking.getTo(), booking.getRoomId(), bookingId)) {
+		if (!validateBookingUpdateDates(booking.getFrom(), booking.getTo(), booking.getRoomId(), booking.getBookingId())) {
 			throw new BookingOverlappingException("The room is already booked for this period!");
 		}
 	}
 
 	private boolean validateBookingUpdateDates(LocalDate from, LocalDate to, int roomId, int bookingId, int... idToIgnore) {
-
 		for (Booking booking : findAll()) {
 			if (booking.getRoomId() == roomId) {
-				if (idToIgnore.length > 0 && booking.getBookingId() == idToIgnore[0]) {
+				if (idToIgnore.length == 1 && booking.getBookingId() == idToIgnore[0]) {
 					continue;
 				}
 				if (bookingId == booking.getBookingId()) {
@@ -196,16 +189,13 @@ public class BookingService {
 	}
 
 	private boolean validateBookingFields(Booking booking) {
-		int roomId = booking.getRoomId(), numberOfPeople = booking.getNumberOfPeople(), guestId = booking.getGuestId();
-		LocalDate from = booking.getFrom(), to = booking.getTo();
+		validateDates(booking.getFrom(), booking.getTo());
 
-		validateDates(from, to);
-
-		if (roomService.getRoomById(roomId).getRoomId() == roomId &&
-			roomService.getRoomById(roomId).getRoomCapacity() >= numberOfPeople &&
-			guestService.findById(guestId).getGuestId() == guestId) {
+		if (roomService.getRoomById(booking.getRoomId()).getRoomCapacity() >=  booking.getNumberOfPeople() &&
+			guestService.findById(booking.getGuestId()).getGuestId() == booking.getGuestId()) {
 			return true;
 		}
+
 		return false;
 	}
 
@@ -216,19 +206,18 @@ public class BookingService {
 	}
 
 	private void validateBookingCreationDates(LocalDate from, LocalDate to, int roomId) {
-		for (Booking book : findAll()) {
-			if (book.getRoomId() == roomId) {
-				if ((from.isBefore(book.getFrom()) && to.equals(book.getFrom()) ||
-
-					(from.isBefore(book.getFrom()) && (to.isBefore(book.getFrom()))))) {
-					continue;
-				}
-				if (!to.isAfter(book.getFrom()) || !from.isBefore(book.getTo())) {
+		for (Booking booking : findAll()) {
+			if (booking.getRoomId() == roomId) {
+				if (!to.isAfter(booking.getFrom()) || !from.isBefore(booking.getTo())) {
 					continue;
 				} else {
 					throw new BookingOverlappingException("The booking can not be created because dates are overlapped!");
 				}
 			}
 		}
+	}
+
+	private Booking findAndBookFirstAvailableRoom(LocalDate from, LocalDate to){
+		return null;
 	}
 }
