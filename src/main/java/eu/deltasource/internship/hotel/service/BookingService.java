@@ -1,6 +1,7 @@
 package eu.deltasource.internship.hotel.service;
 
 import eu.deltasource.internship.hotel.domain.Booking;
+import eu.deltasource.internship.hotel.domain.Room;
 import eu.deltasource.internship.hotel.exception.BookingOverlappingException;
 import eu.deltasource.internship.hotel.exception.FailedInitializationException;
 import eu.deltasource.internship.hotel.exception.ItemNotFoundException;
@@ -172,10 +173,9 @@ public class BookingService {
 				if (bookingId == booking.getBookingId()) {
 					return (validateBookingUpdateDates(from, to, roomId, bookingId, bookingId));
 				}
-				if (!from.isBefore(booking.getTo()) || !to.isAfter(booking.getFrom())) {
-					continue;
+				if (to.isAfter(booking.getFrom()) && from.isBefore(booking.getTo())) {
+					return false;
 				}
-				return false;
 			}
 		}
 		return true;
@@ -191,12 +191,10 @@ public class BookingService {
 	private boolean validateBookingFields(Booking booking) {
 		validateDates(booking.getFrom(), booking.getTo());
 
-		if (roomService.getRoomById(booking.getRoomId()).getRoomCapacity() >=  booking.getNumberOfPeople() &&
-			guestService.findById(booking.getGuestId()).getGuestId() == booking.getGuestId()) {
-			return true;
-		}
+		boolean hasEnoughCapacity = roomService.getRoomById(booking.getRoomId()).getRoomCapacity() >=  booking.getNumberOfPeople();
+		boolean isGuestSame = guestService.findById(booking.getGuestId()).getGuestId() == booking.getGuestId();
 
-		return false;
+		return hasEnoughCapacity && isGuestSame;
 	}
 
 	private void validateDates(LocalDate from, LocalDate to) {
@@ -207,17 +205,29 @@ public class BookingService {
 
 	private void validateBookingCreationDates(LocalDate from, LocalDate to, int roomId) {
 		for (Booking booking : findAll()) {
-			if (booking.getRoomId() == roomId) {
-				if (!to.isAfter(booking.getFrom()) || !from.isBefore(booking.getTo())) {
-					continue;
-				} else {
-					throw new BookingOverlappingException("The booking can not be created because dates are overlapped!");
-				}
+			boolean isComparable = booking.getRoomId() == roomId;
+			if (isComparable && to.isAfter(booking.getFrom()) && from.isBefore(booking.getTo())) {
+				throw new BookingOverlappingException("The booking can not be created because dates are overlapped!");
 			}
 		}
 	}
 
-	private Booking findAndBookFirstAvailableRoom(LocalDate from, LocalDate to){
-		return null;
+	private void findAndBookFirstAvailableRoom(LocalDate from, LocalDate to, int guestId, int numberOfPeople){
+		for(Room room : roomService.findRooms()){
+			boolean isVacant = true;
+			for(Booking booking : findAll()){
+				if(room.getRoomId() == booking.getRoomId()){
+					if(to.isAfter(booking.getFrom()) && from.isBefore(booking.getTo())){
+						isVacant = false;
+						break;
+					}
+				}
+			}
+			if(isVacant){
+				save(new Booking(1, guestId, room.getRoomId(), numberOfPeople, from, to));
+				return;
+			}
+		}
+		throw new BookingOverlappingException("Cannot create booking in the specified interval");
 	}
 }
