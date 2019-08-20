@@ -191,7 +191,7 @@ public class BookingService {
 	private boolean validateBookingFields(Booking booking) {
 		validateDates(booking.getFrom(), booking.getTo());
 
-		boolean hasEnoughCapacity = roomService.getRoomById(booking.getRoomId()).getRoomCapacity() >=  booking.getNumberOfPeople();
+		boolean hasEnoughCapacity = roomService.getRoomById(booking.getRoomId()).getRoomCapacity() >= booking.getNumberOfPeople();
 		boolean isGuestSame = guestService.findById(booking.getGuestId()).getGuestId() == booking.getGuestId();
 
 		return hasEnoughCapacity && isGuestSame;
@@ -212,22 +212,23 @@ public class BookingService {
 		}
 	}
 
-	private void findAndBookFirstAvailableRoom(LocalDate from, LocalDate to, int guestId, int numberOfPeople){
-		for(Room room : roomService.findRooms()){
+	public void findAndBookFirstAvailableRoom(Booking newBooking) {
+		for (Room room : roomService.findRooms()) {
 			boolean isVacant = true;
-			for(Booking booking : findAll()){
-				if(room.getRoomId() == booking.getRoomId()){
-					if(to.isAfter(booking.getFrom()) && from.isBefore(booking.getTo())){
+			for (Booking booking : findAll()) {
+				if (room.getRoomId() == booking.getRoomId()) {
+					if (newBooking.getTo().isAfter(booking.getFrom()) && newBooking.getFrom().isBefore(booking.getTo())) {
 						isVacant = false;
 						break;
 					}
 				}
 			}
-			if(isVacant){
-				save(new Booking(1, guestId, room.getRoomId(), numberOfPeople, from, to));
+			if (isVacant) {
+				save(new Booking(1, newBooking.getGuestId(), room.getRoomId(),
+					newBooking.getNumberOfPeople(), newBooking.getFrom(), newBooking.getTo()));
 				return;
 			}
 		}
-		throw new BookingOverlappingException("Cannot create booking in the specified interval");
+		throw new BookingOverlappingException("Cannot create booking for the specified interval");
 	}
 }

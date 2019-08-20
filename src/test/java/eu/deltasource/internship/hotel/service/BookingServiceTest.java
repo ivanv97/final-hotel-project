@@ -39,7 +39,6 @@ public class BookingServiceTest {
 
 	@BeforeEach
 	public void setUp() {
-
 		// guests
 		Guest firstGuest = new Guest(1, "John", "Miller", Gender.MALE);
 		Guest secondGuest = new Guest(2, "Maria", "Tam", Gender.FEMALE);
@@ -318,5 +317,19 @@ public class BookingServiceTest {
 		//when and then
 		assertThrows(BookingOverlappingException.class,
 			() -> bookingService.updateBookingByDates(firstBooking.getBookingId(), updateFrom, updateTo));
+	}
+
+	@Test
+	public void findAndBookFirstAvailableRoomShouldWorkIfNoConflicts() {
+		//Given
+		Booking thirdBooking = new Booking(3, 1, 1, 2,
+			LocalDate.of(2019, 8, 18), LocalDate.of(2019, 8, 19));
+
+		//When
+		bookingService.findAndBookFirstAvailableRoom(thirdBooking);
+
+		//Then
+		assertTrue(bookingService.findAll().contains(thirdBooking));
+		assertEquals(3, bookingService.findAll().size());
 	}
 }
