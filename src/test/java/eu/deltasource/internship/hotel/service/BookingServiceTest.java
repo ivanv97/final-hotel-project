@@ -332,4 +332,19 @@ public class BookingServiceTest {
 		assertTrue(bookingService.findAll().contains(thirdBooking));
 		assertEquals(3, bookingService.findAll().size());
 	}
+
+	@Test
+	public void findAndBookFirstAvailableRoomShouldFailIfOverlapping() {
+		//Given
+		Booking thirdBooking = new Booking(3, 1, 3, 2,
+			LocalDate.of(2019, 8, 17), LocalDate.of(2019, 8, 23));
+		bookingService.save(thirdBooking);
+		Booking newBooking = new Booking(4, 1, 3, 2,
+			LocalDate.of(2019, 8, 16), LocalDate.of(2019, 8, 21));
+
+		//When
+
+		//Then
+		assertThrows(BookingOverlappingException.class, () -> bookingService.findAndBookFirstAvailableRoom(newBooking));
+	}
 }

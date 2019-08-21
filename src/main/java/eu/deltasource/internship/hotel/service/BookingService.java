@@ -212,19 +212,34 @@ public class BookingService {
 		}
 	}
 
+	/**
+	 * Searches for and books the
+	 * first available room that has the
+	 * appropriate capacity and there are
+	 * no conflicts in the dates of the
+	 * bookings
+	 *
+	 * @param newBooking all that matters here is guestId, number of people,
+	 *                   from and to date, roomId is irrelevant
+	 * @throws BookingOverlappingException if there are no free rooms for the desired interval
+	 */
 	public void findAndBookFirstAvailableRoom(Booking newBooking) {
+		validateDates(newBooking.getFrom(), newBooking.getTo());
+		guestService.findById(newBooking.getGuestId());
+
 		for (Room room : roomService.findRooms()) {
 			boolean isVacant = true;
 			for (Booking booking : findAll()) {
 				if (room.getRoomId() == booking.getRoomId()) {
-					if (newBooking.getTo().isAfter(booking.getFrom()) && newBooking.getFrom().isBefore(booking.getTo())) {
+					if ((room.getRoomCapacity() < newBooking.getNumberOfPeople())
+						|| (newBooking.getTo().isAfter(booking.getFrom()) && newBooking.getFrom().isBefore(booking.getTo()))) {
 						isVacant = false;
 						break;
 					}
 				}
 			}
 			if (isVacant) {
-				save(new Booking(1, newBooking.getGuestId(), room.getRoomId(),
+				bookingRepository.save(new Booking(1, newBooking.getGuestId(), room.getRoomId(),
 					newBooking.getNumberOfPeople(), newBooking.getFrom(), newBooking.getTo()));
 				return;
 			}
