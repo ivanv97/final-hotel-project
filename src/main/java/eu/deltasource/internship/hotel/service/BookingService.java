@@ -230,12 +230,12 @@ public class BookingService {
 		for (Room room : roomService.findRooms()) {
 			boolean isVacant = true;
 			for (Booking booking : findAll()) {
-				if (room.getRoomId() == booking.getRoomId()) {
-					if ((room.getRoomCapacity() < newBooking.getNumberOfPeople())
-						|| (newBooking.getTo().isAfter(booking.getFrom()) && newBooking.getFrom().isBefore(booking.getTo()))) {
-						isVacant = false;
-						break;
-					}
+				boolean isBookingComparable = room.getRoomId() == booking.getRoomId();
+				boolean isCapacityNotEnough = room.getRoomCapacity() < newBooking.getNumberOfPeople();
+				boolean doesOverlap = newBooking.getTo().isAfter(booking.getFrom()) && newBooking.getFrom().isBefore(booking.getTo());
+				if (isBookingComparable && (isCapacityNotEnough || doesOverlap)) {
+					isVacant = false;
+					break;
 				}
 			}
 			if (isVacant) {
