@@ -1,0 +1,9 @@
+# Files to be ignored when pushing to GitHub
+
+# MAVEN
+target/
+*.iml
+
+# INTELLIJ
+.idea/
+out/

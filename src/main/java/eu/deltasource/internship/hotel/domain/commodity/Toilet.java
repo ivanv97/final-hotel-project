@@ -1,7 +1,7 @@
 package eu.deltasource.internship.hotel.domain.commodity;
 
 /**
- * Created by Taner Ilyazov - Delta Source Bulgaria on 2019-07-28.
+ * Represents a toilet in a hotel room
  */
 public class Toilet extends AbstractCommodity {
 
@@ -13,5 +13,4 @@ public class Toilet extends AbstractCommodity {
     public void prepare() {
         System.out.println("The toilet is being cleaned!");
     }
-
 }

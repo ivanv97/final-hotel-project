@@ -1,18 +1,17 @@
 package eu.deltasource.internship.hotel.domain.commodity;
 
+import lombok.Getter;
+
 /**
- * Created by Taner Ilyazov - Delta Source Bulgaria on 2019-07-28.
+ * Represents different types of beds
  */
 public enum BedType {
     SINGLE(1), DOUBLE(2), KING_SIZE(2);
 
+    @Getter
     private final int size;
 
-    BedType(int size){
+    BedType(int size) {
         this.size = size;
-    }
-
-    public int getSize() {
-        return size;
     }
 }
