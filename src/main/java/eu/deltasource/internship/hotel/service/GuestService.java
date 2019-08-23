@@ -26,7 +26,7 @@ public class GuestService {
 	/**
 	 * Constructor that takes
 	 * repository object which is annotated as
-	 * Autowired and the repository itself as bean (@Repository)
+	 * autowired and the repository itself as bean (@Repository)
 	 */
 	@Autowired
 	public GuestService(GuestRepository guestRepository) {
@@ -62,7 +62,6 @@ public class GuestService {
 	 * Creates new guest
 	 *
 	 * @param item the new guest
-	 * @throws ArgumentNotValidException if the guest has invalid fields or is null
 	 */
 	public void save(Guest item) {
 		validateGuest(item);
@@ -95,9 +94,13 @@ public class GuestService {
 
 	/**
 	 * Updates an existing guest
+	 * Validates the updated
+	 * version beforehand
 	 *
 	 * @param guest the guest that will be updated
 	 * @return the updated guest
+	 * @throws ItemNotFoundException if we try to
+	 * update non-existing guest
 	 */
 	public Guest updateGuest(Guest guest) {
 		validateGuest(guest);
@@ -112,6 +115,8 @@ public class GuestService {
 	 *
 	 * @param id guest's id
 	 * @return true if the guest is successfully removed
+	 * @throws ItemNotFoundException if the id passed
+	 * does not match any existing id in repo
 	 */
 	public boolean deleteById(int id) {
 		if (!guestRepository.existsById(id)) {
@@ -126,6 +131,8 @@ public class GuestService {
 	 *
 	 * @param guest the guest that will be removed
 	 * @return true if the guest if successfully removed
+	 * @throws ItemNotFoundException if we do not
+	 * find a matching id in repo
 	 */
 	public boolean deleteGuest(Guest guest) {
 		validateGuest(guest);

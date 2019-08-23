@@ -33,7 +33,8 @@ public class RoomService {
 	private final RoomRepository roomRepository;
 
 	/**
-	 * This is a constructor
+	 * Constructor - takes repository
+	 * object and assigns it to field
 	 *
 	 * @param roomRepository rooms repository
 	 */
@@ -43,7 +44,7 @@ public class RoomService {
 	}
 
 	/**
-	 * Returns a list of all the rooms - if there are any
+	 * Returns a list of all the rooms - if any
 	 */
 	public List<Room> findRooms() {
 		return roomRepository.findAll();
@@ -55,6 +56,8 @@ public class RoomService {
 	 *
 	 * @param id room's id
 	 * @return copy of the found room
+	 * @throws ItemNotFoundException if the room we want to get
+	 * does not exist
 	 */
 	public Room getRoomById(int id) {
 		if (!roomRepository.existsById(id)) {
@@ -65,6 +68,8 @@ public class RoomService {
 
 	/**
 	 * Creates a new room
+	 * First checks if room instance
+	 * is valid
 	 *
 	 * @param room the new room
 	 * @return the new room
@@ -76,10 +81,11 @@ public class RoomService {
 	}
 
 	/**
-	 * Creates multiple rooms
+	 * Creates multiple rooms by passed varargs
+	 * Checks each room for validity beforehand
 	 *
 	 * @param rooms array of rooms
-	 * @return the new rooms
+	 * @return all rooms in the repo
 	 */
 	public List<Room> saveRooms(Room... rooms) {
 		validateRoomList(rooms);
@@ -90,8 +96,8 @@ public class RoomService {
 	/**
 	 * Creates all the rooms in the passed list of rooms
 	 *
-	 * @param rooms
-	 * @return list of the new created rooms
+	 * @param rooms list of room to be saved
+	 * @return all rooms in the repo
 	 */
 	public List<Room> saveRooms(List<Room> rooms) {
 		return saveRooms(rooms.toArray(new Room[rooms.size()]));
@@ -99,9 +105,13 @@ public class RoomService {
 
 	/**
 	 * Updates existing room
+	 * Takes room argument, as we want
+	 * it to be updated and validates it
 	 *
-	 * @param room the room that will be updated
+	 * @param room the way we want the room to look like
 	 * @return the updated room
+	 * @throws ItemNotFoundException if the room we're
+	 * trying to update doesn't exist
 	 */
 	public Room updateRoom(Room room) {
 		validateRoom(room);
@@ -116,6 +126,8 @@ public class RoomService {
 	 *
 	 * @param id room's id
 	 * @return true if the room is successfully deleted/removed
+	 * @throws ItemNotFoundException if room we try to delete
+	 * a non-existing room
 	 */
 	public boolean deleteRoomById(int id) {
 		if (!roomRepository.existsById(id)) {
@@ -130,6 +142,8 @@ public class RoomService {
 	 *
 	 * @param room the room that will be deleted
 	 * @return true if the room was successfully deleted
+	 * @throws ItemNotFoundException if room we try to delete
+	 * a non-existing room
 	 */
 	public boolean deleteRoom(Room room) {
 		validateRoom(room);
@@ -173,6 +187,7 @@ public class RoomService {
 			|| roomDTO.getCommodities().contains(null)) {
 			throw new ArgumentNotValidException("Invalid roomDTO transfer object!");
 		}
+
 		int roomId = roomDTO.getRoomId();
 		Set<AbstractCommodity> roomCommodities = new HashSet<>();
 		for (AbstractCommodityDTO commodityDTO : roomDTO.getCommodities()) {

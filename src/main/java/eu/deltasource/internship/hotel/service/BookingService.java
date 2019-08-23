@@ -55,7 +55,7 @@ public class BookingService {
 	}
 
 	/**
-	 * Creates new booking
+	 * Validates and creates new booking
 	 *
 	 * @param newBooking the new booking
 	 */
@@ -116,12 +116,12 @@ public class BookingService {
 	public Booking updateBookingByDates(int bookingId, LocalDate from, LocalDate to) {
 		validateDates(from, to);
 		Booking booking = findById(bookingId);
-
-		if (validateBookingUpdateDates(from, to, booking.getRoomId(), bookingId)) {
-			booking.setBookingDates(from, to);
-			return bookingRepository.updateDates(booking);
+		Booking updatedBooking = new Booking(bookingId, booking.getGuestId(), booking.getRoomId(), booking.getNumberOfPeople(),
+			from, to);
+		if (!validateBookingUpdateDates(from, to, booking.getRoomId(), bookingId)) {
+			throw new BookingOverlappingException("Overlapping dates!");
 		}
-		throw new BookingOverlappingException("Overlapping dates!");
+		return bookingRepository.updateDates(updatedBooking);
 	}
 
 	/**
