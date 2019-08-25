@@ -2,7 +2,6 @@ package eu.deltasource.internship.hotel.service;
 
 import eu.deltasource.internship.hotel.domain.Guest;
 import eu.deltasource.internship.hotel.exception.ArgumentNotValidException;
-import eu.deltasource.internship.hotel.exception.FailedInitializationException;
 import eu.deltasource.internship.hotel.exception.ItemNotFoundException;
 import eu.deltasource.internship.hotel.repository.GuestRepository;
 
@@ -100,11 +99,11 @@ public class GuestService {
 	 * @param guest the guest that will be updated
 	 * @return the updated guest
 	 * @throws ItemNotFoundException if we try to
-	 * update non-existing guest
+	 *                               update non-existing guest
 	 */
 	public Guest updateGuest(Guest guest) {
 		validateGuest(guest);
-		if(!guestRepository.existsById(guest.getGuestId())){
+		if (!guestRepository.existsById(guest.getGuestId())) {
 			throw new ItemNotFoundException("Guest cannot be updated - does not exist.");
 		}
 		return guestRepository.updateGuest(guest);
@@ -116,7 +115,7 @@ public class GuestService {
 	 * @param id guest's id
 	 * @return true if the guest is successfully removed
 	 * @throws ItemNotFoundException if the id passed
-	 * does not match any existing id in repo
+	 *                               does not match any existing id in repo
 	 */
 	public boolean deleteById(int id) {
 		if (!guestRepository.existsById(id)) {
@@ -132,7 +131,7 @@ public class GuestService {
 	 * @param guest the guest that will be removed
 	 * @return true if the guest if successfully removed
 	 * @throws ItemNotFoundException if we do not
-	 * find a matching id in repo
+	 *                               find a matching id in repo
 	 */
 	public boolean deleteGuest(Guest guest) {
 		validateGuest(guest);
@@ -149,22 +148,38 @@ public class GuestService {
 		guestRepository.deleteAll();
 	}
 
+	/**
+	 * Validates a list guest by guest
+	 * Ensures list is not null
+	 *
+	 * @param guests the guest list we are to verify
+	 * @throws ArgumentNotValidException if the list itself is null
+	 */
 	private void validateGuestList(List<Guest> guests) {
 		if (guests == null) {
-			throw new FailedInitializationException("List of guests cannot be null!");
+			throw new ArgumentNotValidException("List of guests cannot be null!");
 		}
 		for (Guest guest : guests) {
 			validateGuest(guest);
 		}
 	}
 
+	/**
+	 * Validates the guest passed as parameter -
+	 * should have assigned gender and names should
+	 * not be null or empty strings
+	 *
+	 * @param guest the guest to be validated
+	 * @throws ArgumentNotValidException if the guest is null or if
+	 *                                       any of the fields does not comply with requirements
+	 */
 	private void validateGuest(Guest guest) {
 		if (guest == null) {
-			throw new FailedInitializationException("Guest cannot be null!");
+			throw new ArgumentNotValidException("Guest cannot be null!");
 		}
 		if (guest.getFirstName() == null || guest.getLastName() == null || guest.getGender() == null
 			|| guest.getFirstName().isEmpty() || guest.getLastName().isEmpty()) {
-			throw new FailedInitializationException("Invalid guest fields!");
+			throw new ArgumentNotValidException("Invalid guest fields!");
 		}
 	}
 }

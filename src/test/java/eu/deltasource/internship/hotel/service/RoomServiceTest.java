@@ -6,7 +6,6 @@ import eu.deltasource.internship.hotel.exception.ArgumentNotValidException;
 import eu.deltasource.internship.hotel.exception.FailedInitializationException;
 import eu.deltasource.internship.hotel.exception.ItemNotFoundException;
 import eu.deltasource.internship.hotel.repository.RoomRepository;
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.BeforeEach;
 import eu.deltasource.internship.hotel.domain.commodity.Bed;

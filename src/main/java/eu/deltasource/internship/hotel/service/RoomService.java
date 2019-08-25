@@ -57,7 +57,7 @@ public class RoomService {
 	 * @param id room's id
 	 * @return copy of the found room
 	 * @throws ItemNotFoundException if the room we want to get
-	 * does not exist
+	 *                               does not exist
 	 */
 	public Room getRoomById(int id) {
 		if (!roomRepository.existsById(id)) {
@@ -111,7 +111,7 @@ public class RoomService {
 	 * @param room the way we want the room to look like
 	 * @return the updated room
 	 * @throws ItemNotFoundException if the room we're
-	 * trying to update doesn't exist
+	 *                               trying to update doesn't exist
 	 */
 	public Room updateRoom(Room room) {
 		validateRoom(room);
@@ -127,7 +127,7 @@ public class RoomService {
 	 * @param id room's id
 	 * @return true if the room is successfully deleted/removed
 	 * @throws ItemNotFoundException if room we try to delete
-	 * a non-existing room
+	 *                               a non-existing room
 	 */
 	public boolean deleteRoomById(int id) {
 		if (!roomRepository.existsById(id)) {
@@ -143,7 +143,7 @@ public class RoomService {
 	 * @param room the room that will be deleted
 	 * @return true if the room was successfully deleted
 	 * @throws ItemNotFoundException if room we try to delete
-	 * a non-existing room
+	 *                               a non-existing room
 	 */
 	public boolean deleteRoom(Room room) {
 		validateRoom(room);
@@ -181,6 +181,8 @@ public class RoomService {
 	 *
 	 * @param roomDTO DTO object
 	 * @return model object
+	 * @throws ArgumentNotValidException if the roomDTO is null or
+	 *                                   its commodities are null or any commodity is null
 	 */
 	public Room convertDTORoomToModel(RoomDTO roomDTO) {
 		if (roomDTO == null || roomDTO.getCommodities() == null
@@ -203,6 +205,13 @@ public class RoomService {
 		return new Room(roomId, roomCommodities);
 	}
 
+	/**
+	 * Validates a whole array of rooms
+	 * one by one
+	 *
+	 * @param rooms the array we are about to validate
+	 * @throws ArgumentNotValidException if the array is null
+	 */
 	private void validateRoomList(Room... rooms) {
 		if (rooms == null) {
 			throw new ArgumentNotValidException("Invalid rooms !");
@@ -212,6 +221,14 @@ public class RoomService {
 		}
 	}
 
+	/**
+	 * Validates a room -
+	 * It should not be null and should have at least
+	 * one bed and commodities field should not be null either
+	 *
+	 * @param room the room to be checked
+	 * @throws ArgumentNotValidException if any of the requirements is not satisfied
+	 */
 	private void validateRoom(Room room) {
 		if (room == null || room.getCommodities() == null
 			|| room.getCommodities().isEmpty() || room.getCommodities().contains(null)

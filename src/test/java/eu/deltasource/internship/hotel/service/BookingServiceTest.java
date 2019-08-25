@@ -5,8 +5,8 @@ import eu.deltasource.internship.hotel.domain.Gender;
 import eu.deltasource.internship.hotel.domain.Guest;
 import eu.deltasource.internship.hotel.domain.Room;
 import eu.deltasource.internship.hotel.domain.commodity.*;
+import eu.deltasource.internship.hotel.exception.ArgumentNotValidException;
 import eu.deltasource.internship.hotel.exception.BookingOverlappingException;
-import eu.deltasource.internship.hotel.exception.FailedInitializationException;
 import eu.deltasource.internship.hotel.domain.commodity.Bed;
 import eu.deltasource.internship.hotel.domain.commodity.BedType;
 import eu.deltasource.internship.hotel.exception.ItemNotFoundException;
@@ -170,7 +170,7 @@ public class BookingServiceTest {
 			() -> bookingService.save(thirdBooking));
 
 		// booking is null
-		assertThrows(FailedInitializationException.class,
+		assertThrows(ArgumentNotValidException.class,
 			() -> bookingService.save(null));
 	}
 
@@ -210,7 +210,7 @@ public class BookingServiceTest {
 
 		//when and then
 		//not enough capacity for the first booking and invalid room id for the second
-		assertThrows(FailedInitializationException.class,
+		assertThrows(ArgumentNotValidException.class,
 			() -> bookingService.saveAll(firstBooking, secondBooking));
 	}
 
@@ -283,7 +283,7 @@ public class BookingServiceTest {
 		Booking booking = new Booking(1, 1, 1, 12, from, to);
 
 		//when and then
-		assertThrows(FailedInitializationException.class,
+		assertThrows(ArgumentNotValidException.class,
 			() -> bookingService.updateBooking(booking));
 	}
 
