@@ -87,7 +87,9 @@ public class GuestService {
 	 * @param items Guest varargs
 	 */
 	public void saveAll(Guest... items) {
-		validateGuestList(Arrays.asList(items));
+		for(Guest item : items){
+			validateGuest(item);
+		}
 		guestRepository.saveAll(items);
 	}
 
@@ -146,22 +148,6 @@ public class GuestService {
 	 */
 	public void deleteAll() {
 		guestRepository.deleteAll();
-	}
-
-	/**
-	 * Validates a list guest by guest
-	 * Ensures list is not null
-	 *
-	 * @param guests the guest list we are to verify
-	 * @throws ArgumentNotValidException if the list itself is null
-	 */
-	private void validateGuestList(List<Guest> guests) {
-		if (guests == null) {
-			throw new ArgumentNotValidException("List of guests cannot be null!");
-		}
-		for (Guest guest : guests) {
-			validateGuest(guest);
-		}
 	}
 
 	/**

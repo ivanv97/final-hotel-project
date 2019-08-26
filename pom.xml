@@ -20,6 +20,7 @@
 		<surefire.version>2.22.0</surefire.version>
 		<lombok.version>1.18.8</lombok.version>
 		<sonarqube.version>3.6.0.1398</sonarqube.version>
+		<jacoco.version>0.7.7.201606060606</jacoco.version>
 	</properties>
 
 	<dependencies>
@@ -77,6 +78,25 @@
 			<groupId>org.sonarsource.scanner.maven</groupId>
 			<artifactId>sonar-maven-plugin</artifactId>
 			<version>${sonarqube.version}</version>
+		</plugin>
+		<plugin>
+			<groupId>org.jacoco</groupId>
+			<artifactId>jacoco-maven-plugin</artifactId>
+			<version>${jacoco.version}</version>
+			<executions>
+				<execution>
+					<goals>
+						<goal>prepare-agent</goal>
+					</goals>
+				</execution>
+				<execution>
+					<id>report</id>
+					<phase>prepare-package</phase>
+					<goals>
+						<goal>report</goal>
+					</goals>
+				</execution>
+			</executions>
 		</plugin>
 	</plugins>
 	</build>

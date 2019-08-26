@@ -9,7 +9,6 @@ import eu.deltasource.internship.hotel.repository.BookingRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.awt.print.Book;
 import java.time.LocalDate;
 import java.util.List;
 
@@ -127,18 +126,13 @@ public class BookingService {
 	 * @param updatedBooking the new booking
 	 * @throws ItemNotFoundException     if the booking we wish to update
 	 *                                   doesn't match any existing ones
-	 * @throws ArgumentNotValidException if the updated booking differs in guestId
-	 *                                   than its previous version
 	 */
 	public void updateBooking(Booking updatedBooking) {
 		if (!bookingRepository.existsById(updatedBooking.getBookingId())) {
 			throw new ItemNotFoundException("Booking with id " + updatedBooking.getBookingId() + " does not exist!");
 		}
-		if (bookingRepository.findById(updatedBooking.getBookingId()).getGuestId() != updatedBooking.getGuestId()) {
-			throw new ArgumentNotValidException("Booking to be updated must have the same guest ID!");
-		}
 		validateBooking(updatedBooking);
-		validateUpdateBooking(updatedBooking);
+		validateUpdatedBooking(updatedBooking);
 		deleteById(updatedBooking.getBookingId());
 		save(updatedBooking);
 	}
@@ -202,12 +196,12 @@ public class BookingService {
 	 * if is the same - else throws exception
 	 * Then it validates the new dates
 	 *
-	 * @param booking
-	 * @throws ArgumentNotValidException if the guest id is different than the
-	 *                                       current one
-	 * @throws BookingOverlappingException   if the
+	 * @param booking booking as it is to be after the update
+	 * @throws ArgumentNotValidException   if the guest id is different than the
+	 *                                     current one
+	 * @throws BookingOverlappingException if the
 	 */
-	private void validateUpdateBooking(Booking booking) {
+	private void validateUpdatedBooking(Booking booking) {
 		if (booking.getGuestId() != findById(booking.getBookingId()).getGuestId()) {
 			throw new ArgumentNotValidException("You are not allowed to change guest id!");
 		}
@@ -254,7 +248,7 @@ public class BookingService {
 	 *
 	 * @param booking the object to be validated
 	 * @throws ArgumentNotValidException if anything is wrong with the booking
-	 *                                       object
+	 *                                   object
 	 */
 	private void validateBooking(Booking booking) {
 		if (booking == null || !validateBookingFields(booking)) {
@@ -274,7 +268,6 @@ public class BookingService {
 	private boolean validateBookingFields(Booking booking) {
 		validateDates(booking.getFrom(), booking.getTo());
 		guestService.findById(booking.getGuestId());
-
 		return roomService.getRoomById(booking.getRoomId()).getRoomCapacity() >= booking.getNumberOfPeople();
 	}
 

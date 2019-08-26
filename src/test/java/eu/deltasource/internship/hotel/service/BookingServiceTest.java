@@ -288,6 +288,33 @@ public class BookingServiceTest {
 	}
 
 	@Test
+	public void updateBookingShouldFailIfBookingDoesNotExistAlready() {
+		//Given
+		LocalDate from = LocalDate.of(2019, 8, 15);
+		LocalDate to = LocalDate.of(2019, 8, 18);
+		Booking updatedBooking = new Booking(bookingService.findAll().size() + 1, 1, 1, 2, from, to);
+
+		//When
+
+		//Then
+		assertThrows(ItemNotFoundException.class, () -> bookingService.updateBooking(updatedBooking));
+	}
+
+	@Test
+	public void updateBookingShouldFailIfWeTryToChangeGuestId() {
+		//Given
+		LocalDate from = LocalDate.of(2019, 8, 15);
+		LocalDate to = LocalDate.of(2019, 8, 18);
+		Booking updatedBooking = new Booking
+			(1, bookingService.findById(1).getGuestId() + 1, 3, 2, from, to);
+
+		//When
+
+		//Then
+		assertThrows(ArgumentNotValidException.class, () -> bookingService.updateBooking(updatedBooking));
+	}
+
+	@Test
 	public void updateBookingByDatesShouldSucceedIfNotOverlapping() {
 		// given
 		// two bookings already exist

@@ -88,7 +88,9 @@ public class RoomService {
 	 * @return all rooms in the repo
 	 */
 	public List<Room> saveRooms(Room... rooms) {
-		validateRoomList(rooms);
+		for(Room room: rooms){
+			validateRoom(room);
+		}
 		roomRepository.saveAll(rooms);
 		return findRooms();
 	}
@@ -203,22 +205,6 @@ public class RoomService {
 			}
 		}
 		return new Room(roomId, roomCommodities);
-	}
-
-	/**
-	 * Validates a whole array of rooms
-	 * one by one
-	 *
-	 * @param rooms the array we are about to validate
-	 * @throws ArgumentNotValidException if the array is null
-	 */
-	private void validateRoomList(Room... rooms) {
-		if (rooms == null) {
-			throw new ArgumentNotValidException("Invalid rooms !");
-		}
-		for (Room room : rooms) {
-			validateRoom(room);
-		}
 	}
 
 	/**
