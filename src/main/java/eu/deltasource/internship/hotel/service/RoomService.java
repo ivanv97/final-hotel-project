@@ -88,7 +88,7 @@ public class RoomService {
 	 * @return all rooms in the repo
 	 */
 	public List<Room> saveRooms(Room... rooms) {
-		for(Room room: rooms){
+		for (Room room : rooms) {
 			validateRoom(room);
 		}
 		roomRepository.saveAll(rooms);
@@ -163,32 +163,34 @@ public class RoomService {
 	}
 
 	/**
-	 * Converts multiple room DTO objects
-	 * to model objects
+	 * Converts List of RoomDto objects
+	 * to List of Room objects
 	 *
 	 * @param roomsDTO list of DTO objects
 	 * @return list of model objects
+	 * @throws ArgumentNotValidException if the list of dtos is null or is empty
 	 */
-	public List<Room> convertDTORoomsToModel(List<RoomDTO> roomsDTO) {
+	public List<Room> convertMultipleRoomDtoToRoomList(List<RoomDTO> roomsDTO) {
+		if (roomsDTO == null || roomsDTO.isEmpty()) {
+			throw new ArgumentNotValidException("RoomDTO list not valid!");
+		}
 		List<Room> rooms = new ArrayList<>();
 		for (RoomDTO room : roomsDTO) {
-			rooms.add(convertDTORoomToModel(room));
+			rooms.add(convertRoomDtoToRoom(room));
 		}
 		return rooms;
 	}
 
 	/**
-	 * Converts single DTO roomDTO object
-	 * to ordinary model object
+	 * Converts single RoomDTO object
+	 * to ordinary Room object
 	 *
 	 * @param roomDTO DTO object
 	 * @return model object
-	 * @throws ArgumentNotValidException if the roomDTO is null or
-	 *                                   its commodities are null or any commodity is null
+	 * @throws ArgumentNotValidException if the RoomDTO argument is null
 	 */
-	public Room convertDTORoomToModel(RoomDTO roomDTO) {
-		if (roomDTO == null || roomDTO.getCommodities() == null
-			|| roomDTO.getCommodities().contains(null)) {
+	public Room convertRoomDtoToRoom(RoomDTO roomDTO) {
+		if (roomDTO == null) {
 			throw new ArgumentNotValidException("Invalid roomDTO transfer object!");
 		}
 

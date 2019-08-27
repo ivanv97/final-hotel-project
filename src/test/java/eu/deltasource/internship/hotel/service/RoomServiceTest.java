@@ -2,6 +2,9 @@ package eu.deltasource.internship.hotel.service;
 
 import eu.deltasource.internship.hotel.domain.Room;
 import eu.deltasource.internship.hotel.domain.commodity.*;
+import eu.deltasource.internship.hotel.dto.AbstractCommodityDTO;
+import eu.deltasource.internship.hotel.dto.BedDTO;
+import eu.deltasource.internship.hotel.dto.RoomDTO;
 import eu.deltasource.internship.hotel.exception.ArgumentNotValidException;
 import eu.deltasource.internship.hotel.exception.FailedInitializationException;
 import eu.deltasource.internship.hotel.exception.ItemNotFoundException;
@@ -11,10 +14,7 @@ import org.junit.jupiter.api.BeforeEach;
 import eu.deltasource.internship.hotel.domain.commodity.Bed;
 import eu.deltasource.internship.hotel.domain.commodity.BedType;
 
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 import static eu.deltasource.internship.hotel.domain.commodity.BedType.*;
 import static org.junit.jupiter.api.Assertions.*;
@@ -173,30 +173,78 @@ public class RoomServiceTest {
 	}
 
 	@Test
-	public void saveRoomsShouldWorkIfPassedProperVarargs(){
+	public void saveRoomsShouldWorkIfPassedProperVarargs() {
 		//Given
 		roomService.deleteAll();
 
 		//When
-		roomService.saveRooms(singleRoom,kingSizeRoom);
+		roomService.saveRooms(singleRoom, kingSizeRoom);
 
 		//Then
 		assertTrue(roomService.findRooms().contains(singleRoom));
 		assertTrue(roomService.findRooms().contains(kingSizeRoom));
-		assertEquals(2,roomService.findRooms().size());
+		assertEquals(2, roomService.findRooms().size());
 
 	}
 
 	@Test
-	public void saveRoomsShouldFailIfVarargsNotProper(){
+	public void saveRoomsShouldFailIfVarargsNotProper() {
 		//Given
 		roomService.deleteAll();
 
 		//When
 
 		//Then
-		assertThrows(FailedInitializationException.class, () ->roomService.saveRooms(new Room(2, null)));
-		assertThrows(FailedInitializationException.class, () ->roomService.saveRooms(new Room(2,new HashSet<>())));
+		assertThrows(FailedInitializationException.class, () -> roomService.saveRooms(new Room(2, null)));
+		assertThrows(FailedInitializationException.class, () -> roomService.saveRooms(new Room(2, new HashSet<>())));
 		assertThrows(ArgumentNotValidException.class, () -> roomService.saveRooms(kingSizeRoom, null));
+	}
+
+	@Test
+	public void convertRoomDtoToRoomShouldWorkIfProperDtoIsPassed() {
+		//Given
+		Set<AbstractCommodityDTO> commodityDTOSet = new HashSet<>(Arrays.asList(new BedDTO(KING_SIZE)));
+		RoomDTO roomDTO = new RoomDTO(1, commodityDTOSet);
+
+		//When
+		Room convertedRoom = roomService.convertRoomDtoToRoom(roomDTO);
+		Room expectedRoom = new Room(1, new HashSet<>(Arrays.asList(new Bed(KING_SIZE))));
+
+		//Then
+		assertEquals(1, convertedRoom.getCommodities().size());
+		assertEquals(expectedRoom.getRoomCapacity(), convertedRoom.getRoomCapacity());
+	}
+
+	@Test
+	public void convertRoomDtoToRoomShouldThrowExceptionIfDtoNullOrInvalidCommodities() {
+		assertThrows(ArgumentNotValidException.class, () -> roomService.convertRoomDtoToRoom(null));
+	}
+
+	@Test
+	public void convertMultipleRoomDtoToRoomListShouldWorkWithAProperList() {
+		//Given
+		Set<AbstractCommodityDTO> commodityDTOSetFirstRoom = new HashSet<>(Arrays.asList(new BedDTO(SINGLE)));
+		RoomDTO firstRoomDTO = new RoomDTO(1, commodityDTOSetFirstRoom);
+
+		Set<AbstractCommodityDTO> commodityDTOSetSecondRoom = new HashSet<>(Arrays.asList(new BedDTO(DOUBLE)));
+		RoomDTO secondRoomDTO = new RoomDTO(2, commodityDTOSetSecondRoom);
+
+		List<RoomDTO> roomDTOS = new ArrayList<>(Arrays.asList(firstRoomDTO, secondRoomDTO));
+
+		//When
+		List<Room> convertedRooms = roomService.convertMultipleRoomDtoToRoomList(roomDTOS);
+		Room firstExpectedRoom = new Room(1, new HashSet<>(Arrays.asList(new Bed(SINGLE))));
+		Room secondExpectedRoom = new Room(2, new HashSet<>(Arrays.asList(new Bed(DOUBLE))));
+
+		//Then
+		assertEquals(2, convertedRooms.size());
+		assertEquals(firstExpectedRoom.getRoomCapacity(), convertedRooms.get(0).getRoomCapacity());
+		assertEquals(secondExpectedRoom.getRoomCapacity(), convertedRooms.get(1).getRoomCapacity());
+	}
+
+	@Test
+	public void convertMultipleRoomDtoToRoomListShouldThrowExceptionIfArgIsNullOrEmpty() {
+		assertThrows(ArgumentNotValidException.class, () -> roomService.convertMultipleRoomDtoToRoomList(null));
+		assertThrows(ArgumentNotValidException.class, () -> roomService.convertMultipleRoomDtoToRoomList(new ArrayList<>()));
 	}
 }

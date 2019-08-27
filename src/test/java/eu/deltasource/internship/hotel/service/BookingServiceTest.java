@@ -347,6 +347,12 @@ public class BookingServiceTest {
 	}
 
 	@Test
+	public void updateBookingByDatesShouldThrowExceptionIfDatesNotChronological() {
+		assertThrows(ArgumentNotValidException.class, () -> bookingService.updateBookingByDates(1,
+			LocalDate.of(2019, 9, 10), LocalDate.of(2019, 9, 2)));
+	}
+
+	@Test
 	public void findAndBookFirstAvailableRoomShouldWorkIfNoConflicts() {
 		//Given
 		Booking thirdBooking = new Booking(3, 1, 1, 2,
